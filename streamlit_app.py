@@ -55,7 +55,7 @@ def main():
 		# Use 'AM' column for net worth
 		date_col = next((c for c in df.columns if str(df[c].dtype).startswith("datetime")), df.columns[0])
 		try:
-			networth_series = get_series_by_letter(df, "AM")
+			networth_series = safe_number(get_series_by_letter(df, "AM"))
 			df_networth = pd.DataFrame({date_col: df[date_col], "순자산합계": networth_series})
 			st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], "순자산합계"), use_container_width=True)
 		except Exception:
