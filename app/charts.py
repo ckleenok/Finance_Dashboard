@@ -44,7 +44,7 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, heig
 	# first = y_cols[0] if y_cols else None
 	# if first and first in df.columns:
 	# 	_add_trendline(fig, df[x_col], df[first])
-	fig.update_layout(margin=dict(l=10, r=10, t=40, b=10), title=title, height=height)
+	fig.update_layout(margin=dict(l=5, r=5, t=40, b=10), title=title, height=height)
 	return fig
 
 
@@ -60,7 +60,7 @@ def area_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str) -> go.Figur
 			)
 		]
 	)
-	fig.update_layout(margin=dict(l=10, r=10, t=40, b=10), title=title, height=200)
+	fig.update_layout(margin=dict(l=5, r=5, t=40, b=10), title=title, height=200)
 	return fig
 
 
