@@ -40,10 +40,10 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str) -> g
 				name=col,
 			)
 		)
-	# Add overall trendline for first series when available
-	first = y_cols[0] if y_cols else None
-	if first and first in df.columns:
-		_add_trendline(fig, df[x_col], df[first])
+	# Trendline removed - no longer adding trendlines to charts
+	# first = y_cols[0] if y_cols else None
+	# if first and first in df.columns:
+	# 	_add_trendline(fig, df[x_col], df[first])
 	fig.update_layout(margin=dict(l=10, r=10, t=40, b=10), title=title, height=280)
 	return fig
 
