@@ -77,3 +77,24 @@ def safe_number(series: pd.Series) -> pd.Series:
 	)
 
 
+
+def column_index_from_letter(letter: str) -> int:
+	"""Convert Excel-style column letter to 0-based index.
+
+	Examples: 'A' -> 0, 'Z' -> 25, 'AA' -> 26, 'AM' -> 38.
+	"""
+	letter = letter.strip().upper()
+	value = 0
+	for ch in letter:
+		if not ("A" <= ch <= "Z"):
+			raise ValueError("Invalid column letter")
+		value = value * 26 + (ord(ch) - ord("A") + 1)
+	return value - 1
+
+
+def get_series_by_letter(df: pd.DataFrame, letter: str) -> pd.Series:
+	idx = column_index_from_letter(letter)
+	if idx < 0 or idx >= df.shape[1]:
+		raise IndexError(f"Column letter {letter} out of range for dataframe with {df.shape[1]} columns")
+	return df.iloc[:, idx]
+

@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from app.data import load_sheet, coerce_date_column, safe_number
+from app.data import load_sheet, coerce_date_column, safe_number, get_series_by_letter
 from app.charts import line_chart, area_chart
 from app.layout import make_sidebar
 
@@ -52,11 +52,17 @@ def main():
 	# Layout similar to screenshot: 2-column top grid then 3-column sections
 	row1_col1, row1_col2 = st.columns([2, 1])
 	with row1_col1:
-		# Try to pick columns heuristically
+		# Use 'AM' column for net worth
 		date_col = next((c for c in df.columns if str(df[c].dtype).startswith("datetime")), df.columns[0])
-		numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
-		if len(numeric_cols) >= 1:
-			st.plotly_chart(line_chart(df, date_col, numeric_cols[:1], "순자산합계"), use_container_width=True)
+		try:
+			networth_series = get_series_by_letter(df, "AM")
+			df_networth = pd.DataFrame({date_col: df[date_col], "순자산합계": networth_series})
+			st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], "순자산합계"), use_container_width=True)
+		except Exception:
+			# Fallback: heuristic first numeric column
+			numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
+			if len(numeric_cols) >= 1:
+				st.plotly_chart(line_chart(df, date_col, numeric_cols[:1], "순자산합계"), use_container_width=True)
 	with row1_col2:
 		if len(numeric_cols) >= 2:
 			st.plotly_chart(area_chart(df, date_col, numeric_cols[1], "Overall"), use_container_width=True)
