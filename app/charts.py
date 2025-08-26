@@ -27,7 +27,7 @@ def _add_trendline(fig: go.Figure, x, y, name: str = "Trend") -> None:
 	)
 
 
-def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str) -> go.Figure:
+def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, height: int = 280) -> go.Figure:
 	fig = go.Figure()
 	for col in y_cols:
 		if col not in df.columns:
@@ -44,7 +44,7 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str) -> g
 	# first = y_cols[0] if y_cols else None
 	# if first and first in df.columns:
 	# 	_add_trendline(fig, df[x_col], df[first])
-	fig.update_layout(margin=dict(l=10, r=10, t=40, b=10), title=title, height=280)
+	fig.update_layout(margin=dict(l=10, r=10, t=40, b=10), title=title, height=height)
 	return fig
 
 
