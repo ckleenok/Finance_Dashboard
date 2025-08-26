@@ -50,7 +50,7 @@ def main():
 	st.caption(f"행 {len(df)} · 열 {len(df.columns)}")
 
 	# Layout similar to screenshot: 2-column top grid then 3-column sections
-	row1_col1, row1_col2 = st.columns([3, 1])
+	row1_col1, row1_col2 = st.columns([4, 1])
 	with row1_col1:
 		# Use 'AM' column for net worth
 		date_col = next((c for c in df.columns if str(df[c].dtype).startswith("datetime")), df.columns[0])
