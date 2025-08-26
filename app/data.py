@@ -1,3 +1,4 @@
+import io
 import re
 from typing import Optional
 
@@ -30,17 +31,27 @@ def _to_csv_export_url(google_sheets_url: str) -> str:
 
 @st.cache_data(show_spinner=False)
 def load_sheet(google_sheets_url: str, timeout_seconds: int = 20) -> pd.DataFrame:
-	"""Load a Google Sheet as a DataFrame via published CSV export.
-
-	The result is cached by Streamlit. If the sheet is not published or
-	access is restricted, the request will fail.
-	"""
+	"""Load a Google Sheet as a DataFrame via CSV export with friendly errors."""
 	csv_url = _to_csv_export_url(google_sheets_url)
-	response = requests.get(csv_url, timeout=timeout_seconds)
-	response.raise_for_status()
-	# Let pandas infer types; keep_default_na=False allows string 'NA' to stay
-	# while still recognizing real blanks as NaN.
-	df = pd.read_csv(pd.compat.StringIO(response.text)) if hasattr(pd, "compat") else pd.read_csv(pd.io.common.StringIO(response.text))
+	try:
+		response = requests.get(
+			csv_url,
+			timeout=timeout_seconds,
+			headers={"User-Agent": "Mozilla/5.0 (Streamlit Financial Dashboard)"},
+		)
+		response.raise_for_status()
+	except requests.HTTPError:
+		st.error(
+			"Google Sheet에 접근할 수 없습니다. 시트를 '링크가 있는 모든 사용자 보기'로 공유하거나 '웹에 게시' 후 다시 시도하세요."
+		)
+		st.caption(f"요청 URL: {csv_url}")
+		return pd.DataFrame()
+	except requests.RequestException:
+		st.error("네트워크 오류로 데이터를 불러오지 못했습니다. 잠시 후 다시 시도하세요.")
+		return pd.DataFrame()
+
+	# Parse CSV text safely
+	df = pd.read_csv(io.StringIO(response.text))
 	return df
 
 

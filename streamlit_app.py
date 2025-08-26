@@ -43,6 +43,10 @@ def main():
 		df = load_sheet(url)
 		df = _prepare(df)
 
+	if df.empty:
+		st.warning("데이터가 비어 있습니다. 공유 설정 또는 URL을 확인하세요.")
+		return
+
 	st.caption(f"행 {len(df)} · 열 {len(df.columns)}")
 
 	# Layout similar to screenshot: 2-column top grid then 3-column sections
