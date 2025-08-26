@@ -54,6 +54,7 @@ def main():
 	with row1_col1:
 		# Use 'AM' column for net worth
 		date_col = next((c for c in df.columns if str(df[c].dtype).startswith("datetime")), df.columns[0])
+		# Net worth chart
 		try:
 			networth_series = safe_number(get_series_by_letter(df, "AM"))
 			df_networth = pd.DataFrame({date_col: df[date_col], "순자산합계": networth_series})
@@ -63,6 +64,13 @@ def main():
 			numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
 			if len(numeric_cols) >= 1:
 				st.plotly_chart(line_chart(df, date_col, numeric_cols[:1], "순자산합계"), use_container_width=True)
+		# Stock total chart below
+		try:
+			stock_series = safe_number(get_series_by_letter(df, "X"))
+			df_stock = pd.DataFrame({date_col: df[date_col], "주식합계": stock_series})
+			st.plotly_chart(line_chart(df_stock, date_col, ["주식합계"], "주식합계"), use_container_width=True)
+		except Exception:
+			st.caption("주식합계 데이터를 불러올 수 없습니다.")
 	with row1_col2:
 		if len(numeric_cols) >= 2:
 			st.plotly_chart(area_chart(df, date_col, numeric_cols[1], "Overall"), use_container_width=True)
