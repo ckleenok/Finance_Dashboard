@@ -269,9 +269,43 @@ def main():
 			except Exception:
 				st.caption("부동산자산합계 데이터를 불러올 수 없습니다.")
 		
-		# Add debt total chart below the three asset charts
-		debt_container = st.container()
-		with debt_container:
+		# Third row: ISA/Pension and Debt
+		row3_col1, row3_col2 = st.columns(2)
+		
+		with row3_col1:
+			# Combined ISA/Pension chart (Q and S columns)
+			try:
+				isa_q_series = safe_number(get_series_by_letter(df_filtered, "Q"))
+				isa_s_series = safe_number(get_series_by_letter(df_filtered, "S"))
+				
+				df_isa = pd.DataFrame({
+					date_col: df_filtered[date_col], 
+					"연희 미래 ISA/연금": isa_q_series,
+					"철규 미래 ISA": isa_s_series
+				})
+				
+				# Calculate latest values and changes
+				latest_isa_q = isa_q_series.dropna().iloc[-1] if not isa_q_series.dropna().empty else 0
+				latest_isa_s = isa_s_series.dropna().iloc[-1] if not isa_s_series.dropna().empty else 0
+				
+				mom_change_q, change_color_q = get_mom_change(isa_q_series)
+				mom_change_s, change_color_s = get_mom_change(isa_s_series)
+				
+				title_with_value = f"ISA/연금 현황"
+				st.markdown(f"<h3 style='font-size: 1.4rem; margin-bottom: 0.5rem;'>{title_with_value}</h3>", unsafe_allow_html=True)
+				
+				# Display individual metrics
+				col_q, col_s = st.columns(2)
+				with col_q:
+					st.markdown(f"<p style='color: {change_color_q}; font-size: 1.1rem; margin: 0;'>연희: {latest_isa_q:,.0f} {mom_change_q}</p>", unsafe_allow_html=True)
+				with col_s:
+					st.markdown(f"<p style='color: {change_color_s}; font-size: 1.1rem; margin: 0;'>철규: {latest_isa_s:,.0f} {mom_change_s}</p>", unsafe_allow_html=True)
+				
+				st.plotly_chart(line_chart(df_isa, date_col, ["연희 미래 ISA/연금", "철규 미래 ISA"], "", height=200), use_container_width=True)
+			except Exception:
+				st.caption("ISA/연금 데이터를 불러올 수 없습니다.")
+		
+		with row3_col2:
 			# Debt total chart
 			try:
 				debt_series = safe_number(get_series_by_letter(df_filtered, "AL"))
