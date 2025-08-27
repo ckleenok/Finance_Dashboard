@@ -245,14 +245,6 @@ def main():
 			# Empty column for spacing
 			pass
 
-	row2_col1, row2_col2 = st.columns(2)
-	with row2_col1:
-		if len(numeric_cols) >= 2:
-			st.plotly_chart(line_chart(df_filtered, date_col, [numeric_cols[0]], "자산추세"), use_container_width=True)
-	with row2_col2:
-		if len(numeric_cols) >= 3:
-			st.plotly_chart(line_chart(df_filtered, date_col, [numeric_cols[2]], "부채추세"), use_container_width=True)
-
 	st.divider()
 	row3_col1 = st.container()
 	with row3_col1:
