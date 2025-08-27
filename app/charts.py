@@ -59,13 +59,13 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, heig
 	
 	# Position legend at bottom
 	fig.update_layout(
-		margin=dict(l=2, r=2, t=20, b=40), 
+		margin=dict(l=2, r=2, t=20, b=50), 
 		title=title, 
 		height=height,
 		legend=dict(
 			orientation="h",
 			yanchor="top",
-			y=-0.15,
+			y=-0.25,
 			xanchor="center",
 			x=0.5
 		)
