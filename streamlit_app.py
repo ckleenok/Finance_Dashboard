@@ -157,6 +157,9 @@ def main():
 		# Use 'AM' column for net worth
 		date_col = next((c for c in df_filtered.columns if str(df_filtered[c].dtype).startswith("datetime")), df_filtered.columns[0])
 		
+		# Get numeric columns for fallback charts
+		numeric_cols = [c for c in df_filtered.columns if pd.api.types.is_numeric_dtype(df_filtered[c])]
+		
 		# Split first row into two columns: 50% for assets, 50% for net worth
 		top_col1, top_col2 = st.columns(2)
 		
@@ -181,7 +184,6 @@ def main():
 				st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], title_with_value), use_container_width=True)
 			except Exception:
 				# Fallback: heuristic first numeric column
-				numeric_cols = [c for c in df_filtered.columns if pd.api.types.is_numeric_dtype(df_filtered[c])]
 				if len(numeric_cols) >= 1:
 					st.plotly_chart(line_chart(df_filtered, date_col, numeric_cols[:1], "순자산합계"), use_container_width=True)
 		
