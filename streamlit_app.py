@@ -150,6 +150,41 @@ def main():
 	
 	st.caption(f"행 {len(df_filtered)} · 열 {len(df_filtered.columns)} · 필터: {time_filter}")
 
+	# Helper function to calculate month-over-month change
+	def get_mom_change(series):
+		"""Calculate month-over-month change and return formatted string with color coding"""
+		if len(series.dropna()) < 2:
+			return "0", "gray"
+		
+		current = series.dropna().iloc[-1]
+		previous = series.dropna().iloc[-2]
+		
+		change = current - previous
+		change_pct = (change / previous * 100) if previous != 0 else 0
+		
+		# Format change amount
+		if abs(change) >= 1_000_000_000:  # 1B+
+			change_str = f"{change/1_000_000_000:+.1f}B"
+		elif abs(change) >= 1_000_000:  # 1M+
+			change_str = f"{change/1_000_000:+.1f}M"
+		elif abs(change) >= 1_000:  # 1K+
+			change_str = f"{change/1_000:+.1f}K"
+		else:
+			change_str = f"{change:+.0f}"
+		
+		# Format percentage
+		pct_str = f"{change_pct:+.1f}%"
+		
+		# Color coding
+		if change > 0:
+			color = "green"
+		elif change < 0:
+			color = "red"
+		else:
+			color = "gray"
+		
+		return f"[{change_str} {pct_str}]", color
+
 	# Layout similar to screenshot: 2-column top grid then 3-column sections
 	row1_col1 = st.container()
 	with row1_col1:
@@ -168,8 +203,10 @@ def main():
 				assets_series = safe_number(get_series_by_letter(df_filtered, "AG"))
 				df_assets = pd.DataFrame({date_col: df_filtered[date_col], "자산합계": assets_series})
 				latest_assets = assets_series.dropna().iloc[-1] if not assets_series.dropna().empty else 0
-				title_with_value = f"자산합계 ({latest_assets:,.0f})"
-				st.plotly_chart(line_chart(df_assets, date_col, ["자산합계"], title_with_value), use_container_width=True)
+				mom_change, change_color = get_mom_change(assets_series)
+				title_with_value = f"자산합계 ({latest_assets:,.0f}) {mom_change}"
+				st.markdown(f"<h4 style='color: {change_color};'>{title_with_value}</h4>", unsafe_allow_html=True)
+				st.plotly_chart(line_chart(df_assets, date_col, ["자산합계"], ""), use_container_width=True)
 			except Exception:
 				st.caption("자산합계 데이터를 불러올 수 없습니다.")
 		
@@ -179,8 +216,10 @@ def main():
 				networth_series = safe_number(get_series_by_letter(df_filtered, "AM"))
 				df_networth = pd.DataFrame({date_col: df_filtered[date_col], "순자산합계": networth_series})
 				latest_networth = networth_series.dropna().iloc[-1] if not networth_series.dropna().empty else 0
-				title_with_value = f"순자산합계 ({latest_networth:,.0f})"
-				st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], title_with_value), use_container_width=True)
+				mom_change, change_color = get_mom_change(networth_series)
+				title_with_value = f"순자산합계 ({latest_networth:,.0f}) {mom_change}"
+				st.markdown(f"<h4 style='color: {change_color};'>{title_with_value}</h4>", unsafe_allow_html=True)
+				st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], ""), use_container_width=True)
 			except Exception:
 				# Fallback: heuristic first numeric column
 				if len(numeric_cols) >= 1:
@@ -195,8 +234,10 @@ def main():
 				stock_series = safe_number(get_series_by_letter(df_filtered, "X"))
 				df_stock = pd.DataFrame({date_col: df_filtered[date_col], "주식합계": stock_series})
 				latest_stock = stock_series.dropna().iloc[-1] if not stock_series.dropna().empty else 0
-				title_with_value = f"주식합계 ({latest_stock:,.0f})"
-				st.plotly_chart(line_chart(df_stock, date_col, ["주식합계"], title_with_value, height=200), use_container_width=True)
+				mom_change, change_color = get_mom_change(stock_series)
+				title_with_value = f"주식합계 ({latest_stock:,.0f}) {mom_change}"
+				st.markdown(f"<h5 style='color: {change_color};'>{title_with_value}</h5>", unsafe_allow_html=True)
+				st.plotly_chart(line_chart(df_stock, date_col, ["주식합계"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("주식합계 데이터를 불러올 수 없습니다.")
 		
@@ -206,8 +247,10 @@ def main():
 				pension_series = safe_number(get_series_by_letter(df_filtered, "AC"))
 				df_pension = pd.DataFrame({date_col: df_filtered[date_col], "연금자산합계": pension_series})
 				latest_pension = pension_series.dropna().iloc[-1] if not pension_series.dropna().empty else 0
-				title_with_value = f"연금자산합계 ({latest_pension:,.0f})"
-				st.plotly_chart(line_chart(df_pension, date_col, ["연금자산합계"], title_with_value, height=200), use_container_width=True)
+				mom_change, change_color = get_mom_change(pension_series)
+				title_with_value = f"연금자산합계 ({latest_pension:,.0f}) {mom_change}"
+				st.markdown(f"<h5 style='color: {change_color};'>{title_with_value}</h5>", unsafe_allow_html=True)
+				st.plotly_chart(line_chart(df_pension, date_col, ["연금자산합계"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("연금자산합계 데이터를 불러올 수 없습니다.")
 		
@@ -217,8 +260,10 @@ def main():
 				realestate_series = safe_number(get_series_by_letter(df_filtered, "AF"))
 				df_realestate = pd.DataFrame({date_col: df_filtered[date_col], "부동산자산합계": realestate_series})
 				latest_realestate = realestate_series.dropna().iloc[-1] if not realestate_series.dropna().empty else 0
-				title_with_value = f"부동산자산합계 ({latest_realestate:,.0f})"
-				st.plotly_chart(line_chart(df_realestate, date_col, ["부동산자산합계"], title_with_value, height=200), use_container_width=True)
+				mom_change, change_color = get_mom_change(realestate_series)
+				title_with_value = f"부동산자산합계 ({latest_realestate:,.0f}) {mom_change}"
+				st.markdown(f"<h5 style='color: {change_color};'>{title_with_value}</h5>", unsafe_allow_html=True)
+				st.plotly_chart(line_chart(df_realestate, date_col, ["부동산자산합계"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("부동산자산합계 데이터를 불러올 수 없습니다.")
 		
@@ -230,8 +275,10 @@ def main():
 				debt_series = safe_number(get_series_by_letter(df_filtered, "AL"))
 				df_debt = pd.DataFrame({date_col: df_filtered[date_col], "부채합계": debt_series})
 				latest_debt = debt_series.dropna().iloc[-1] if not debt_series.dropna().empty else 0
-				title_with_value = f"부채합계 ({latest_debt:,.0f})"
-				st.plotly_chart(line_chart(df_debt, date_col, ["부채합계"], title_with_value, height=200), use_container_width=True)
+				mom_change, change_color = get_mom_change(debt_series)
+				title_with_value = f"부채합계 ({latest_debt:,.0f}) {mom_change}"
+				st.markdown(f"<h4 style='color: {change_color};'>{title_with_value}</h4>", unsafe_allow_html=True)
+				st.plotly_chart(line_chart(df_debt, date_col, ["부채합계"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("부채합계 데이터를 불러올 수 없습니다.")
 
