@@ -165,7 +165,9 @@ def main():
 			try:
 				assets_series = safe_number(get_series_by_letter(df_filtered, "AG"))
 				df_assets = pd.DataFrame({date_col: df_filtered[date_col], "자산합계": assets_series})
-				st.plotly_chart(line_chart(df_assets, date_col, ["자산합계"], "자산합계"), use_container_width=True)
+				latest_assets = assets_series.dropna().iloc[-1] if not assets_series.dropna().empty else 0
+				title_with_value = f"자산합계 ({latest_assets:,.0f})"
+				st.plotly_chart(line_chart(df_assets, date_col, ["자산합계"], title_with_value), use_container_width=True)
 			except Exception:
 				st.caption("자산합계 데이터를 불러올 수 없습니다.")
 		
@@ -174,7 +176,9 @@ def main():
 			try:
 				networth_series = safe_number(get_series_by_letter(df_filtered, "AM"))
 				df_networth = pd.DataFrame({date_col: df_filtered[date_col], "순자산합계": networth_series})
-				st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], "순자산합계"), use_container_width=True)
+				latest_networth = networth_series.dropna().iloc[-1] if not networth_series.dropna().empty else 0
+				title_with_value = f"순자산합계 ({latest_networth:,.0f})"
+				st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], title_with_value), use_container_width=True)
 			except Exception:
 				# Fallback: heuristic first numeric column
 				numeric_cols = [c for c in df_filtered.columns if pd.api.types.is_numeric_dtype(df_filtered[c])]
@@ -189,7 +193,9 @@ def main():
 			try:
 				stock_series = safe_number(get_series_by_letter(df_filtered, "X"))
 				df_stock = pd.DataFrame({date_col: df_filtered[date_col], "주식합계": stock_series})
-				st.plotly_chart(line_chart(df_stock, date_col, ["주식합계"], "주식합계", height=200), use_container_width=True)
+				latest_stock = stock_series.dropna().iloc[-1] if not stock_series.dropna().empty else 0
+				title_with_value = f"주식합계 ({latest_stock:,.0f})"
+				st.plotly_chart(line_chart(df_stock, date_col, ["주식합계"], title_with_value, height=200), use_container_width=True)
 			except Exception:
 				st.caption("주식합계 데이터를 불러올 수 없습니다.")
 		
@@ -198,7 +204,9 @@ def main():
 			try:
 				pension_series = safe_number(get_series_by_letter(df_filtered, "AC"))
 				df_pension = pd.DataFrame({date_col: df_filtered[date_col], "연금자산합계": pension_series})
-				st.plotly_chart(line_chart(df_pension, date_col, ["연금자산합계"], "연금자산합계", height=200), use_container_width=True)
+				latest_pension = pension_series.dropna().iloc[-1] if not pension_series.dropna().empty else 0
+				title_with_value = f"연금자산합계 ({latest_pension:,.0f})"
+				st.plotly_chart(line_chart(df_pension, date_col, ["연금자산합계"], title_with_value, height=200), use_container_width=True)
 			except Exception:
 				st.caption("연금자산합계 데이터를 불러올 수 없습니다.")
 		
@@ -207,7 +215,9 @@ def main():
 			try:
 				realestate_series = safe_number(get_series_by_letter(df_filtered, "AF"))
 				df_realestate = pd.DataFrame({date_col: df_filtered[date_col], "부동산자산합계": realestate_series})
-				st.plotly_chart(line_chart(df_realestate, date_col, ["부동산자산합계"], "부동산자산합계", height=200), use_container_width=True)
+				latest_realestate = realestate_series.dropna().iloc[-1] if not realestate_series.dropna().empty else 0
+				title_with_value = f"부동산자산합계 ({latest_realestate:,.0f})"
+				st.plotly_chart(line_chart(df_realestate, date_col, ["부동산자산합계"], title_with_value, height=200), use_container_width=True)
 			except Exception:
 				st.caption("부동산자산합계 데이터를 불러올 수 없습니다.")
 		
@@ -219,7 +229,9 @@ def main():
 			try:
 				debt_series = safe_number(get_series_by_letter(df_filtered, "AL"))
 				df_debt = pd.DataFrame({date_col: df_filtered[date_col], "부채합계": debt_series})
-				st.plotly_chart(line_chart(df_debt, date_col, ["부채합계"], "부채합계", height=200), use_container_width=True)
+				latest_debt = debt_series.dropna().iloc[-1] if not debt_series.dropna().empty else 0
+				title_with_value = f"부채합계 ({latest_debt:,.0f})"
+				st.plotly_chart(line_chart(df_debt, date_col, ["부채합계"], title_with_value, height=200), use_container_width=True)
 			except Exception:
 				st.caption("부채합계 데이터를 불러올 수 없습니다.")
 		
