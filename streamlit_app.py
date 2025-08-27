@@ -34,6 +34,7 @@ def _apply_time_filter(df: pd.DataFrame, time_filter: str) -> pd.DataFrame:
 	# Find the date column
 	date_col = next((c for c in df.columns if str(df[c].dtype).startswith("datetime")), None)
 	if not date_col:
+		st.warning("날짜 컬럼을 찾을 수 없습니다. 모든 데이터를 표시합니다.")
 		return df  # No date column found, return all data
 	
 	# Get the latest date
@@ -58,6 +59,7 @@ def _apply_time_filter(df: pd.DataFrame, time_filter: str) -> pd.DataFrame:
 	
 	# Filter data based on the cutoff date
 	filtered_df = df[df[date_col] >= cutoff_date]
+	
 	return filtered_df
 
 

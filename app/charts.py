@@ -44,6 +44,13 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, heig
 	# first = y_cols[0] if y_cols else None
 	# if first and first in df.columns:
 	# 	_add_trendline(fig, df[x_col], df[first])
+	
+	# Set x-axis range to match filtered data
+	if not df.empty and x_col in df.columns:
+		x_min = df[x_col].min()
+		x_max = df[x_col].max()
+		fig.update_xaxes(range=[x_min, x_max])
+	
 	fig.update_layout(margin=dict(l=2, r=2, t=40, b=10), title=title, height=height)
 	return fig
 
@@ -60,6 +67,13 @@ def area_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str) -> go.Figur
 			)
 		]
 	)
+	
+	# Set x-axis range to match filtered data
+	if not df.empty and x_col in df.columns:
+		x_min = df[x_col].min()
+		x_max = df[x_col].max()
+		fig.update_xaxes(range=[x_min, x_max])
+	
 	fig.update_layout(margin=dict(l=2, r=2, t=40, b=10), title=title, height=200)
 	return fig
 
