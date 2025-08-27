@@ -224,9 +224,8 @@ def main():
 				st.caption("부동산자산합계 데이터를 불러올 수 없습니다.")
 		
 		# Add debt total chart below the three asset charts
-		debt_col1, debt_col2, debt_col3 = st.columns(3)
-		
-		with debt_col1:
+		debt_container = st.container()
+		with debt_container:
 			# Debt total chart
 			try:
 				debt_series = safe_number(get_series_by_letter(df_filtered, "AL"))
@@ -236,31 +235,8 @@ def main():
 				st.plotly_chart(line_chart(df_debt, date_col, ["부채합계"], title_with_value, height=200), use_container_width=True)
 			except Exception:
 				st.caption("부채합계 데이터를 불러올 수 없습니다.")
-		
-		with debt_col2:
-			# Empty column for spacing
-			pass
-		
-		with debt_col3:
-			# Empty column for spacing
-			pass
 
-	st.divider()
-	row3_col1 = st.container()
-	with row3_col1:
-		if len(numeric_cols) >= 4:
-			st.plotly_chart(line_chart(df_filtered, date_col, numeric_cols[:4], "ISA / 기타"), use_container_width=True)
-
-	row4_col1, row4_col2 = st.columns(2)
-	with row4_col1:
-		if len(numeric_cols) >= 5:
-			st.plotly_chart(line_chart(df_filtered, date_col, [numeric_cols[4]], "나이키주식"), use_container_width=True)
-	with row4_col2:
-		if len(numeric_cols) >= 6:
-			st.plotly_chart(line_chart(df_filtered, date_col, [numeric_cols[5]], "미래퇴직연금"), use_container_width=True)
-
-
-if __name__ == "__main__":
-	main()
+	if __name__ == "__main__":
+		main()
 
 
