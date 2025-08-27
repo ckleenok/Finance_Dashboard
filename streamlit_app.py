@@ -269,8 +269,8 @@ def main():
 			except Exception:
 				st.caption("부동산자산합계 데이터를 불러올 수 없습니다.")
 		
-		# Third row: ISA/Pension and Debt
-		row3_col1, row3_col2 = st.columns(2)
+		# Third row: ISA/Pension, Toss Stocks, and Debt
+		row3_col1, row3_col2, row3_col3 = st.columns(3)
 		
 		with row3_col1:
 			# Combined ISA/Pension chart (Q and S columns)
@@ -306,6 +306,39 @@ def main():
 				st.caption("ISA/연금 데이터를 불러올 수 없습니다.")
 		
 		with row3_col2:
+			# Combined Toss Stocks chart (P and T columns)
+			try:
+				toss_p_series = safe_number(get_series_by_letter(df_filtered, "P"))
+				toss_t_series = safe_number(get_series_by_letter(df_filtered, "T"))
+				
+				df_toss = pd.DataFrame({
+					date_col: df_filtered[date_col], 
+					"연희 토스 주식": toss_p_series,
+					"철규 토스 주식": toss_t_series
+				})
+				
+				# Calculate latest values and changes
+				latest_toss_p = toss_p_series.dropna().iloc[-1] if not toss_p_series.dropna().empty else 0
+				latest_toss_t = toss_t_series.dropna().iloc[-1] if not toss_t_series.dropna().empty else 0
+				
+				mom_change_p, change_color_p = get_mom_change(toss_p_series)
+				mom_change_t, change_color_t = get_mom_change(toss_t_series)
+				
+				title_with_value = f"토스 주식"
+				st.markdown(f"<h3 style='font-size: 1.4rem; margin-bottom: 0.5rem;'>{title_with_value}</h3>", unsafe_allow_html=True)
+				
+				# Display individual metrics
+				col_p, col_t = st.columns(2)
+				with col_p:
+					st.markdown(f"<p style='color: {change_color_p}; font-size: 1.1rem; margin: 0;'>연희: {latest_toss_p:,.0f} {mom_change_p}</p>", unsafe_allow_html=True)
+				with col_t:
+					st.markdown(f"<p style='color: {change_color_t}; font-size: 1.1rem; margin: 0;'>철규: {latest_toss_t:,.0f} {mom_change_t}</p>", unsafe_allow_html=True)
+				
+				st.plotly_chart(line_chart(df_toss, date_col, ["연희 토스 주식", "철규 토스 주식"], "", height=200), use_container_width=True)
+			except Exception:
+				st.caption("토스 주식 데이터를 불러올 수 없습니다.")
+		
+		with row3_col3:
 			# Debt total chart
 			try:
 				debt_series = safe_number(get_series_by_letter(df_filtered, "AL"))
