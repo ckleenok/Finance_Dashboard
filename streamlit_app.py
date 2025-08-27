@@ -146,15 +146,6 @@ def main():
 		st.warning("데이터가 비어 있습니다. 공유 설정 또는 URL을 확인하세요.")
 		return
 
-	# Debug: Show column information
-	st.sidebar.write("**데이터 컬럼 정보:**")
-	for i, col in enumerate(df.columns):
-		st.sidebar.write(f"{i}: {col} ({df[col].dtype})")
-		if df[col].dtype == object:
-			sample_values = df[col].dropna().head(3)
-			if len(sample_values) > 0:
-				st.sidebar.write(f"  샘플: {list(sample_values)}")
-
 	# Apply time filter
 	df_filtered = _apply_time_filter(df, time_filter)
 	
