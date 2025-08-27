@@ -38,6 +38,9 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, heig
 				y=df[col],
 				mode="lines+markers",
 				name=col,
+				hovertemplate="<b>%{x}</b><br>" +
+							f"<b>{col}:</b> %{{y:,.2f}}<br>" +
+							"<extra></extra>"
 			)
 		)
 	# Trendline removed - no longer adding trendlines to charts
@@ -64,6 +67,9 @@ def area_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str) -> go.Figur
 				mode="lines",
 				fill="tozeroy",
 				name=y_col,
+				hovertemplate="<b>%{x}</b><br>" +
+							f"<b>{y_col}:</b> %{{y:,.2f}}<br>" +
+							"<extra></extra>"
 			)
 		]
 	)
