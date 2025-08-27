@@ -137,9 +137,8 @@ def main():
 			st.cache_data.clear()
 			st.rerun()
 
-	url = st.text_input("Google Sheets URL", value=GOOGLE_SHEET_URL_DEFAULT)
 	with st.spinner("데이터 불러오는 중..."):
-		df = load_sheet(url)
+		df = load_sheet(GOOGLE_SHEET_URL_DEFAULT)
 		df = _prepare(df)
 
 	if df.empty:
@@ -235,6 +234,11 @@ def main():
 				st.plotly_chart(line_chart(df_debt, date_col, ["부채합계"], title_with_value, height=200), use_container_width=True)
 			except Exception:
 				st.caption("부채합계 데이터를 불러올 수 없습니다.")
+
+	# Google Sheets URL input at the bottom
+	st.divider()
+	url = st.text_input("Google Sheets URL", value=GOOGLE_SHEET_URL_DEFAULT)
+	st.caption("URL을 변경하려면 위 입력창에 새로운 URL을 입력하고 Enter를 누르세요.")
 
 
 if __name__ == "__main__":
