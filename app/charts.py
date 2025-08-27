@@ -57,7 +57,19 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, heig
 	# Format y-axis to show B, M, K units
 	fig.update_yaxes(tickformat=".2s")
 	
-	fig.update_layout(margin=dict(l=2, r=2, t=20, b=10), title=title, height=height)
+	# Position legend at bottom
+	fig.update_layout(
+		margin=dict(l=2, r=2, t=20, b=10), 
+		title=title, 
+		height=height,
+		legend=dict(
+			orientation="h",
+			yanchor="bottom",
+			y=0.02,
+			xanchor="center",
+			x=0.5
+		)
+	)
 	return fig
 
 

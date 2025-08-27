@@ -291,7 +291,7 @@ def main():
 				mom_change_q, change_color_q = get_mom_change(isa_q_series)
 				mom_change_s, change_color_s = get_mom_change(isa_s_series)
 				
-				title_with_value = f"ISA/연금 현황"
+				title_with_value = f"ISA"
 				st.markdown(f"<h3 style='font-size: 1.4rem; margin-bottom: 0.5rem;'>{title_with_value}</h3>", unsafe_allow_html=True)
 				
 				# Display individual metrics
