@@ -16,7 +16,7 @@ GOOGLE_SHEET_URL_DEFAULT = (
 def _prepare(df: pd.DataFrame) -> pd.DataFrame:
 	# Attempt common column conversions
 	for col in df.columns:
-		if "date" in col.lower() or col.endswith(("월", "날짜")):
+		if "date" in col.lower() or col.endswith(("월", "날짜", "일", "시간")):
 			df = coerce_date_column(df, col)
 		elif df[col].dtype == object:
 			# Best-effort numeric conversion for money-like fields
@@ -24,6 +24,35 @@ def _prepare(df: pd.DataFrame) -> pd.DataFrame:
 			# Only replace if we actually got numbers in many rows
 			if pd.notna(maybe_numeric).sum() >= max(3, int(0.5 * len(maybe_numeric))):
 				df[col] = maybe_numeric
+	
+	# Additional date detection for columns that might contain dates
+	for col in df.columns:
+		if df[col].dtype == object and col not in [c for c in df.columns if str(df[c].dtype).startswith("datetime")]:
+			try:
+				# Try to detect if this column contains dates
+				sample_values = df[col].dropna().head(20)
+				if len(sample_values) > 0:
+					# Check if values look like dates
+					date_patterns = [
+						r'\d{4}-\d{1,2}-\d{1,2}',  # YYYY-MM-DD
+						r'\d{1,2}/\d{1,2}/\d{4}',  # MM/DD/YYYY
+						r'\d{4}년\s*\d{1,2}월\s*\d{1,2}일',  # YYYY년 MM월 DD일
+						r'\d{1,2}월\s*\d{1,2}일',  # MM월 DD일
+					]
+					
+					import re
+					date_like_count = 0
+					for val in sample_values:
+						val_str = str(val)
+						if any(re.search(pattern, val_str) for pattern in date_patterns):
+							date_like_count += 1
+					
+					# If more than 70% look like dates, convert the column
+					if date_like_count >= len(sample_values) * 0.7:
+						df[col] = pd.to_datetime(df[col], errors="coerce")
+			except:
+				continue
+	
 	return df
 
 
@@ -31,8 +60,42 @@ def _apply_time_filter(df: pd.DataFrame, time_filter: str) -> pd.DataFrame:
 	"""
 	Applies a time filter to the DataFrame based on the selected time period.
 	"""
-	# Find the date column
+	# Find the date column - try multiple strategies
+	date_col = None
+	
+	# Strategy 1: Look for existing datetime columns
 	date_col = next((c for c in df.columns if str(df[c].dtype).startswith("datetime")), None)
+	
+	# Strategy 2: Look for columns with date-related names
+	if not date_col:
+		date_keywords = ["date", "날짜", "월", "일", "time", "시간"]
+		for col in df.columns:
+			if any(keyword in col.lower() for keyword in date_keywords):
+				# Try to convert this column to datetime
+				try:
+					df_copy = df.copy()
+					df_copy[col] = pd.to_datetime(df_copy[col], errors="coerce")
+					# Check if conversion was successful (not all NaT)
+					if df_copy[col].notna().sum() > len(df_copy) * 0.5:  # At least 50% valid dates
+						date_col = col
+						df[col] = df_copy[col]  # Update the original dataframe
+						break
+				except:
+					continue
+	
+	# Strategy 3: Look for the first column that might be dates
+	if not date_col:
+		for col in df.columns:
+			try:
+				# Try to convert to datetime
+				test_conversion = pd.to_datetime(df[col].head(10), errors="coerce")
+				if test_conversion.notna().sum() >= 5:  # At least 5 out of 10 valid dates
+					df[col] = pd.to_datetime(df[col], errors="coerce")
+					date_col = col
+					break
+			except:
+				continue
+	
 	if not date_col:
 		st.warning("날짜 컬럼을 찾을 수 없습니다. 모든 데이터를 표시합니다.")
 		return df  # No date column found, return all data
@@ -82,6 +145,15 @@ def main():
 	if df.empty:
 		st.warning("데이터가 비어 있습니다. 공유 설정 또는 URL을 확인하세요.")
 		return
+
+	# Debug: Show column information
+	st.sidebar.write("**데이터 컬럼 정보:**")
+	for i, col in enumerate(df.columns):
+		st.sidebar.write(f"{i}: {col} ({df[col].dtype})")
+		if df[col].dtype == object:
+			sample_values = df[col].dropna().head(3)
+			if len(sample_values) > 0:
+				st.sidebar.write(f"  샘플: {list(sample_values)}")
 
 	# Apply time filter
 	df_filtered = _apply_time_filter(df, time_filter)
