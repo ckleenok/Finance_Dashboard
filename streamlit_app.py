@@ -152,7 +152,7 @@ def main():
 	st.caption(f"행 {len(df_filtered)} · 열 {len(df_filtered.columns)} · 필터: {time_filter}")
 
 	# Layout similar to screenshot: 2-column top grid then 3-column sections
-	row1_col1, row1_col2 = st.columns([4, 1])
+	row1_col1 = st.container()
 	with row1_col1:
 		# Use 'AM' column for net worth
 		date_col = next((c for c in df_filtered.columns if str(df_filtered[c].dtype).startswith("datetime")), df_filtered.columns[0])
@@ -196,10 +196,6 @@ def main():
 				st.plotly_chart(line_chart(df_realestate, date_col, ["부동산자산합계"], "부동산자산합계", height=200), use_container_width=True)
 			except Exception:
 				st.caption("부동산자산합계 데이터를 불러올 수 없습니다.")
-	with row1_col2:
-		numeric_cols = [c for c in df_filtered.columns if pd.api.types.is_numeric_dtype(df_filtered[c])]
-		if len(numeric_cols) >= 2:
-			st.plotly_chart(area_chart(df_filtered, date_col, numeric_cols[1], "Overall"), use_container_width=True)
 
 	row2_col1, row2_col2 = st.columns(2)
 	with row2_col1:
