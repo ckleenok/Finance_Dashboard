@@ -236,7 +236,8 @@ def main():
 			except Exception:
 				st.caption("부채합계 데이터를 불러올 수 없습니다.")
 
-	if __name__ == "__main__":
-		main()
+
+if __name__ == "__main__":
+	main()
 
 
