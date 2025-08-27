@@ -39,7 +39,7 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, heig
 				mode="lines+markers",
 				name=col,
 				hovertemplate="<b>%{x}</b><br>" +
-							f"<b>{col}:</b> %{{y:,.2f}}<br>" +
+							f"<b>{col}:</b> %{{y:,.0f}}<br>" +
 							"<extra></extra>"
 			)
 		)
@@ -53,6 +53,9 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, heig
 		x_min = df[x_col].min()
 		x_max = df[x_col].max()
 		fig.update_xaxes(range=[x_min, x_max])
+	
+	# Format y-axis to show B, M, K units
+	fig.update_yaxes(tickformat=".2s")
 	
 	fig.update_layout(margin=dict(l=2, r=2, t=40, b=10), title=title, height=height)
 	return fig
@@ -68,7 +71,7 @@ def area_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str) -> go.Figur
 				fill="tozeroy",
 				name=y_col,
 				hovertemplate="<b>%{x}</b><br>" +
-							f"<b>{y_col}:</b> %{{y:,.2f}}<br>" +
+							f"<b>{y_col}:</b> %{{y:,.0f}}<br>" +
 							"<extra></extra>"
 			)
 		]
@@ -79,6 +82,9 @@ def area_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str) -> go.Figur
 		x_min = df[x_col].min()
 		x_max = df[x_col].max()
 		fig.update_xaxes(range=[x_min, x_max])
+	
+	# Format y-axis to show B, M, K units
+	fig.update_yaxes(tickformat=".2s")
 	
 	fig.update_layout(margin=dict(l=2, r=2, t=40, b=10), title=title, height=200)
 	return fig
