@@ -196,6 +196,26 @@ def main():
 				st.plotly_chart(line_chart(df_realestate, date_col, ["부동산자산합계"], "부동산자산합계", height=200), use_container_width=True)
 			except Exception:
 				st.caption("부동산자산합계 데이터를 불러올 수 없습니다.")
+		
+		# Add debt total chart below the three asset charts
+		debt_col1, debt_col2, debt_col3 = st.columns(3)
+		
+		with debt_col1:
+			# Debt total chart
+			try:
+				debt_series = safe_number(get_series_by_letter(df_filtered, "AL"))
+				df_debt = pd.DataFrame({date_col: df_filtered[date_col], "부채합계": debt_series})
+				st.plotly_chart(line_chart(df_debt, date_col, ["부채합계"], "부채합계", height=200), use_container_width=True)
+			except Exception:
+				st.caption("부채합계 데이터를 불러올 수 없습니다.")
+		
+		with debt_col2:
+			# Empty column for spacing
+			pass
+		
+		with debt_col3:
+			# Empty column for spacing
+			pass
 
 	row2_col1, row2_col2 = st.columns(2)
 	with row2_col1:
