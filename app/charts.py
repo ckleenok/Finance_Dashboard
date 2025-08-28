@@ -55,7 +55,7 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, heig
 		fig.update_xaxes(range=[x_min, x_max])
 	
 	# Format y-axis to show B, M, K units
-	fig.update_yaxes(tickformat=".2s")
+	fig.update_yaxes(tickformat=".1s")
 	
 	# Position legend at bottom
 	fig.update_layout(
@@ -96,7 +96,7 @@ def area_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str) -> go.Figur
 		fig.update_xaxes(range=[x_min, x_max])
 	
 	# Format y-axis to show B, M, K units
-	fig.update_yaxes(tickformat=".2s")
+	fig.update_yaxes(tickformat=".1s")
 	
 	fig.update_layout(margin=dict(l=2, r=2, t=20, b=10), title=title, height=180)
 	return fig
