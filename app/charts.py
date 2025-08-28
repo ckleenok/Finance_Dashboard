@@ -72,20 +72,51 @@ def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, heig
 		
 		if all_values:
 			max_val = max(all_values)
+			min_val = min(all_values)
+			range_val = max_val - min_val
+			
 			if max_val >= 1_000_000_000:  # 1B+
+				# Create more tick points for better readability
+				tick_count = 6
+				tick_vals = []
+				tick_texts = []
+				for i in range(tick_count):
+					val = min_val + (range_val * i / (tick_count - 1))
+					tick_vals.append(val)
+					tick_texts.append(f"{val/1_000_000_000:.1f}B")
+				
 				fig.update_yaxes(
-					tickvals=[0, max_val//4, max_val//2, max_val*3//4, max_val],
-					ticktext=[f"{0}B", f"{max_val//4//1_000_000_000:.1f}B", f"{max_val//2//1_000_000_000:.1f}B", f"{max_val*3//4//1_000_000_000:.1f}B", f"{max_val//1_000_000_000:.1f}B"]
+					tickvals=tick_vals,
+					ticktext=tick_texts,
+					nticks=tick_count
 				)
 			elif max_val >= 1_000_000:  # 1M+
+				tick_count = 6
+				tick_vals = []
+				tick_texts = []
+				for i in range(tick_count):
+					val = min_val + (range_val * i / (tick_count - 1))
+					tick_vals.append(val)
+					tick_texts.append(f"{val/1_000_000:.1f}M")
+				
 				fig.update_yaxes(
-					tickvals=[0, max_val//4, max_val//2, max_val*3//4, max_val],
-					ticktext=[f"{0}M", f"{max_val//4//1_000_000:.1f}M", f"{max_val//2//1_000_000:.1f}M", f"{max_val*3//4//1_000_000:.1f}M", f"{max_val//1_000_000:.1f}M"]
+					tickvals=tick_vals,
+					ticktext=tick_texts,
+					nticks=tick_count
 				)
 			elif max_val >= 1_000:  # 1K+
+				tick_count = 6
+				tick_vals = []
+				tick_texts = []
+				for i in range(tick_count):
+					val = min_val + (range_val * i / (tick_count - 1))
+					tick_vals.append(val)
+					tick_texts.append(f"{val/1_000:.1f}K")
+				
 				fig.update_yaxes(
-					tickvals=[0, max_val//4, max_val//2, max_val*3//4, max_val],
-					ticktext=[f"{0}K", f"{max_val//4//1_000:.1f}K", f"{max_val//2//1_000:.1f}K", f"{max_val*3//4//1_000:.1f}K", f"{max_val//1_000:.1f}K"]
+					tickvals=tick_vals,
+					ticktext=tick_texts,
+					nticks=tick_count
 				)
 	
 	# Position legend at bottom
@@ -139,20 +170,50 @@ def area_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str) -> go.Figur
 		all_values = df[y_col].dropna().tolist()
 		if all_values:
 			max_val = max(all_values)
+			min_val = min(all_values)
+			range_val = max_val - min_val
+			
 			if max_val >= 1_000_000_000:  # 1B+
+				tick_count = 6
+				tick_vals = []
+				tick_texts = []
+				for i in range(tick_count):
+					val = min_val + (range_val * i / (tick_count - 1))
+					tick_vals.append(val)
+					tick_texts.append(f"{val/1_000_000_000:.1f}B")
+				
 				fig.update_yaxes(
-					tickvals=[0, max_val//4, max_val//2, max_val*3//4, max_val],
-					ticktext=[f"{0}B", f"{max_val//4//1_000_000_000:.1f}B", f"{max_val//2//1_000_000_000:.1f}B", f"{max_val*3//4//1_000_000_000:.1f}B", f"{max_val//1_000_000_000:.1f}B"]
+					tickvals=tick_vals,
+					ticktext=tick_texts,
+					nticks=tick_count
 				)
 			elif max_val >= 1_000_000:  # 1M+
+				tick_count = 6
+				tick_vals = []
+				tick_texts = []
+				for i in range(tick_count):
+					val = min_val + (range_val * i / (tick_count - 1))
+					tick_vals.append(val)
+					tick_texts.append(f"{val/1_000_000:.1f}M")
+				
 				fig.update_yaxes(
-					tickvals=[0, max_val//4, max_val//2, max_val*3//4, max_val],
-					ticktext=[f"{0}M", f"{max_val//4//1_000_000:.1f}M", f"{max_val//2//1_000_000:.1f}M", f"{max_val*3//4//1_000_000:.1f}M", f"{max_val//1_000_000:.1f}M"]
+					tickvals=tick_vals,
+					ticktext=tick_texts,
+					nticks=tick_count
 				)
 			elif max_val >= 1_000:  # 1K+
+				tick_count = 6
+				tick_vals = []
+				tick_texts = []
+				for i in range(tick_count):
+					val = min_val + (range_val * i / (tick_count - 1))
+					tick_vals.append(val)
+					tick_texts.append(f"{val/1_000:.1f}K")
+				
 				fig.update_yaxes(
-					tickvals=[0, max_val//4, max_val//2, max_val*3//4, max_val],
-					ticktext=[f"{0}K", f"{max_val//4//1_000:.1f}K", f"{max_val//2//1_000:.1f}K", f"{max_val*3//4//1_000:.1f}K", f"{max_val//1_000:.1f}K"]
+					tickvals=tick_vals,
+					ticktext=tick_texts,
+					nticks=tick_count
 				)
 	
 	fig.update_layout(margin=dict(l=2, r=2, t=20, b=10), title=title, height=180)
