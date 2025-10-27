@@ -156,7 +156,8 @@ def main():
 				if not df_stock_raw.empty and df_stock_raw.shape[1] > 26:
 					df_stock = df_stock_raw.iloc[:, 16:27].copy()
 					# Rename columns using headers from the original sheet
-					df_stock.columns = df_stock_raw.iloc[0, 16:27].values
+					header_values = df_stock_raw.iloc[0, 16:27]
+					df_stock.columns = header_values.tolist() if hasattr(header_values, 'tolist') else list(header_values)
 					# Skip the first row which contains headers
 					df_stock = df_stock.iloc[1:].reset_index(drop=True)
 					df_stock = _prepare(df_stock)
