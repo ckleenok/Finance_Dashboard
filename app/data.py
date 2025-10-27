@@ -101,13 +101,14 @@ def coerce_date_column(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
 
 
 def safe_number(series: pd.Series) -> pd.Series:
-	"""Convert strings with commas or currency symbols to numeric."""
+	"""Convert strings with commas, currency symbols, or percentage symbols to numeric."""
 	return (
 		pd.to_numeric(
 			series.astype(str)
 			.str.replace(",", "", regex=False)
 			.str.replace("₩", "", regex=False)
 			.str.replace("$", "", regex=False)
+			.str.replace("%", "", regex=False)
 			.str.strip(),
 			errors="coerce",
 		)
