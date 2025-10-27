@@ -157,7 +157,9 @@ def main():
 					df_stock = df_stock_raw.iloc[:, 16:27].copy()
 					# Rename columns using headers from the original sheet
 					header_values = df_stock_raw.iloc[0, 16:27]
-					df_stock.columns = header_values.tolist() if hasattr(header_values, 'tolist') else list(header_values)
+					# Convert to list and ensure all values are strings
+					col_names = header_values.tolist() if hasattr(header_values, 'tolist') else list(header_values)
+					df_stock.columns = [str(col) for col in col_names]
 					# Skip the first row which contains headers
 					df_stock = df_stock.iloc[1:].reset_index(drop=True)
 					df_stock = _prepare(df_stock)
