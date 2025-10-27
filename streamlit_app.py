@@ -414,6 +414,10 @@ def main():
 						"Cash/Bond": stock_series_aa
 					})
 					
+					# Debug: show sample data
+					st.write("데이터 샘플 (처음 5개 행):")
+					st.write(df_stock_chart.head())
+					
 					# Display the chart
 					st.plotly_chart(line_chart(df_stock_chart, "Date", ["SPY", "QQQ", "SCHD", "GLD", "Cash/Bond"], "", height=300), use_container_width=True)
 			except Exception as e:
