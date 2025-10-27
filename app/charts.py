@@ -224,18 +224,28 @@ def stacked_bar_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: st
 	"""Create a horizontal stacked bar chart from a DataFrame."""
 	fig = go.Figure()
 	
+	# Normalize each row to 100%
+	df_normalized = df.copy()
+	df_normalized['_total'] = df_normalized[y_cols].sum(axis=1)
+	
+	for col in y_cols:
+		if col not in df_normalized.columns:
+			continue
+		# Normalize to percentage of total
+		df_normalized[col] = (df_normalized[col] / df_normalized['_total']) * 100
+	
 	# Add traces for each column
 	for col in y_cols:
-		if col not in df.columns:
+		if col not in df_normalized.columns:
 			continue
 		fig.add_trace(
 			go.Bar(
 				name=col,
 				orientation='h',
-				y=df[x_col].astype(str),
-				x=df[col],
+				y=df_normalized[x_col].astype(str),
+				x=df_normalized[col],
 				hovertemplate=f"<b>%{{y}}</b><br><b>{col}:</b> %{{x:.2f}}%<extra></extra>",
-				text=df[col].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else ""),
+				text=df_normalized[col].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else ""),
 				textposition='inside'
 			)
 		)
