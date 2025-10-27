@@ -392,6 +392,10 @@ def main():
 			
 			# Debug: check df_stock at this point
 			st.write(f"그래프 생성 시 df_stock: {len(df_stock)}행, {df_stock.shape[1]}열")
+			st.write(f"df_stock columns: {list(df_stock.columns)}")
+			if not df_stock.empty:
+				st.write("df_stock sample:")
+				st.write(df_stock.head(3))
 			
 			try:
 				# First graph: Date & R, S, T, U, V (actual amounts)
