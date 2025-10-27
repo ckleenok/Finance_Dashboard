@@ -157,26 +157,21 @@ def main():
 		if STOCK_SHEET_GID != "0":
 			try:
 				df_stock_raw = load_sheet(GOOGLE_SHEET_URL_DEFAULT, gid=STOCK_SHEET_GID, skiprows=0)
-				# Get the columns starting from Q (index 16) to AA (index 26)
+				# Get the columns starting from Q (index 16) to AA (index 26 managing
 				if not df_stock_raw.empty and df_stock_raw.shape[1] > 26:
+					# Extract Q-AA columns (indices 16-26) and keep them separate
+					# First letter=0 (Q), then W=6, X=7, Y=8, Z=9, AA=10 in the extracted range
 					df_stock = df_stock_raw.iloc[:, 16:27].copy()
-					# Rename columns using headers from the original sheet
-					header_values = df_stock_raw.iloc[0, 16:27]
-					# Convert to list and ensure all values are strings
-					col_names = header_values.tolist() if hasattr(header_values, 'tolist') else list(header_values)
-					df_stock.columns = [str(col) for col in col_names]
+					# Use numeric column names to avoid encoding issues
+					df_stock.columns = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 					# Skip the first row which contains headers
 					df_stock = df_stock.iloc[1:].reset_index(drop=True)
 					
-					# Debug: show before _prepare
+					# Store the extracted data - don't use _prepare as it may cause issues
+					# Convert data types manually if needed
+					
+					# Debug: show before processing
 					st.write(f"_prepare 전: {len(df_stock)}행, {len(df_stock.columns)}열")
-					
-					df_stock = _prepare(df_stock)
-					
-					# Debug: show after _prepare
-					st.write(f"_prepare 후: {len(df_stock)}행, {len(df_stock.columns)}열")
-					if not df_stock.empty:
-						st.write(f"컬럼명: {list(df_stock.columns)}")
 				else:
 					df_stock = df_stock_raw
 			except Exception as e:
@@ -403,15 +398,15 @@ def main():
 				if df_stock.shape[1] < 11:
 					st.caption(f"주식현황 시트에 충분한 컬럼이 없습니다 (현재: {df_stock.shape[1]}). 컬럼 11개 이상이 필요합니다.")
 				else:
-					# Get columns: Col_0=Q (Date), Col_6=W, Col_7=X, Col_8=Y, Col_9=Z, Col_10=AA
-					stock_date_series = df_stock.iloc[:, 0]  # Q column (Date)
+					# Get columns using numeric indices: 0=Q (Date), 6=W, 7=X, 8=Y, 9=Z, 10=AA
+					stock_date_series = df_stock[0]  # Date column
 					
-					# Get stock series from columns W, X, Y, Z, AA
-					stock_series_w = safe_number(df_stock.iloc[:, 6])  # W column (SPY %)
-					stock_series_x = safe_number(df_stock.iloc[:, 7])  # X column (QQQ %)
-					stock_series_y = safe_number(df_stock.iloc[:, 8])  # Y column (SCHD %)
-					stock_series_z = safe_number(df_stock.iloc[:, 9])  # Z column (GLD %)
-					stock_series_aa = safe_number(df_stock.iloc[:, 10])  # AA column (Cash/Bond %)
+					# Get stock series from columns W, X, Y, Z, AA (indices 6-10)
+					stock_series_w = safe_number(df_stock[6])  # SPY %
+					stock_series_x = safe_number(df_stock[7])  # QQQ %
+					stock_series_y = safe_number(df_stock[8])  # SCHD %
+					stock_series_z = safe_number(df_stock[9])  # GLD %
+					stock_series_aa = safe_number(df_stock[10])  # Cash/Bond %
 					
 					# Create DataFrame for stock chart
 					df_stock_chart = pd.DataFrame({
