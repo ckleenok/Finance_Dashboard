@@ -394,36 +394,29 @@ def main():
 			st.write(f"그래프 생성 시 df_stock: {len(df_stock)}행, {df_stock.shape[1]}열")
 			
 			try:
-				# Check if we have enough columns (now we have Q-AA which is 11 columns)
-				if df_stock.shape[1] < 11:
-					st.caption(f"주식현황 시트에 충분한 컬럼이 없습니다 (현재: {df_stock.shape[1]}). 컬럼 11개 이상이 필요합니다.")
-				else:
-					# Get columns using numeric indices: 0=Q (Date), 6=W, 7=X, 8=Y, 9=Z, 10=AA
-					stock_date_series = df_stock[0]  # Date column
-					
-					# Get stock series from columns W, X, Y, Z, AA (indices 6-10)
-					stock_series_w = safe_number(df_stock[6])  # SPY %
-					stock_series_x = safe_number(df_stock[7])  # QQQ %
-					stock_series_y = safe_number(df_stock[8])  # SCHD %
-					stock_series_z = safe_number(df_stock[9])  # GLD %
-					stock_series_aa = safe_number(df_stock[10])  # Cash/Bond %
-					
-					# Create DataFrame for stock chart
-					df_stock_chart = pd.DataFrame({
-						"Date": stock_date_series,
-						"SPY": stock_series_w,
-						"QQQ": stock_series_x,
-						"SCHD": stock_series_y,
-						"GLD": stock_series_z,
-						"Cash/Bond": stock_series_aa
-					})
-					
-					# Debug: show sample data
-					st.write("데이터 샘플 (처음 5개 행):")
-					st.write(df_stock_chart.head())
-					
-					# Display the chart
-					st.plotly_chart(line_chart(df_stock_chart, "Date", ["SPY", "QQQ", "SCHD", "GLD", "Cash/Bond"], "", height=300), use_container_width=True)
+				# First graph: Date & R, S, T, U, V (actual amounts)
+				st.markdown("#### 1. 실제 금액")
+				df_amount = pd.DataFrame({
+					"Date": df_stock[0],  # Column Q
+					"SPY": safe_number(df_stock[1]),  # Column R
+					"QQQ": safe_number(df_stock[2]),  # Column S
+					"SCHD": safe_number(df_stock[3]),  # Column T
+					"GLD": safe_number(df_stock[4]),  # Column U
+					"Cash/Bond": safe_number(df_stock[5])  # Column V
+				})
+				st.plotly_chart(line_chart(df_amount, "Date", ["SPY", "QQQ", "SCHD", "GLD", "Cash/Bond"], "", height=250), use_container_width=True)
+				
+				# Second graph: Date & W, X, Y, Z, AA (percentages)
+				st.markdown("#### 2. 비율 (%)")
+				df_pct = pd.DataFrame({
+					"Date": df_stock[0],  # Column Q
+					"SPY": safe_number(df_stock[6]),  # Column W
+					"QQQ": safe_number(df_stock[7]),  # Column X
+					"SCHD": safe_number(df_stock[8]),  # Column Y
+					"GLD": safe_number(df_stock[9]),  # Column Z
+					"Cash/Bond": safe_number(df_stock[10])  # Column AA
+				})
+				st.plotly_chart(line_chart(df_pct, "Date", ["SPY", "QQQ", "SCHD", "GLD", "Cash/Bond"], "", height=250), use_container_width=True)
 			except Exception as e:
 				st.caption(f"주식현황 그래프를 불러올 수 없습니다: {e}")
 
