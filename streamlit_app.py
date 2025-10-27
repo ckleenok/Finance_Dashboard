@@ -272,12 +272,12 @@ def main():
 			# Stock total chart
 			try:
 				stock_series = safe_number(get_series_by_letter(df_filtered, "X"))
-				df_stock = pd.DataFrame({date_col: df_filtered[date_col], "주식합계": stock_series})
+				df_stock_chart = pd.DataFrame({date_col: df_filtered[date_col], "주식합계": stock_series})
 				latest_stock = stock_series.dropna().iloc[-1] if not stock_series.dropna().empty else 0
 				mom_change, change_color = get_mom_change(stock_series)
 				title_with_value = f"주식합계 ({latest_stock:,.0f}) {mom_change}"
 				st.markdown(f"<h4 style='color: {change_color}; font-size: 1.2rem; margin-bottom: 0.3rem;'>{title_with_value}</h4>", unsafe_allow_html=True)
-				st.plotly_chart(line_chart(df_stock, date_col, ["주식합계"], "", height=200), use_container_width=True)
+				st.plotly_chart(line_chart(df_stock_chart, date_col, ["주식합계"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("주식합계 데이터를 불러올 수 없습니다.")
 		
