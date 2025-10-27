@@ -151,16 +151,19 @@ def main():
 		df_stock = pd.DataFrame()
 		if STOCK_SHEET_GID != "0":
 			try:
-				df_stock_raw = load_sheet(GOOGLE_SHEET_URL_DEFAULT, gid=STOCK_SHEET_GID, skiprows=2)
+				df_stock_raw = load_sheet(GOOGLE_SHEET_URL_DEFAULT, gid=STOCK_SHEET_GID, skiprows=0)
 				# Get the columns starting from Q (index 16) to AA (index 26)
 				if not df_stock_raw.empty and df_stock_raw.shape[1] > 26:
 					df_stock = df_stock_raw.iloc[:, 16:27].copy()
-					df_stock.columns = [f'Col_{i}' for i in range(df_stock.shape[1])]
+					# Rename columns using headers from the original sheet
+					df_stock.columns = df_stock_raw.iloc[0, 16:27].values
+					# Skip the first row which contains headers
+					df_stock = df_stock.iloc[1:].reset_index(drop=True)
 					df_stock = _prepare(df_stock)
 					# Debug: show stock sheet info
 					if not df_stock.empty:
 						st.write(f"주식현황 시트 로드됨: {len(df_stock)}행, {len(df_stock.columns)}열")
-						st.write(f"첫 3개 컬럼 샘플: {list(df_stock.columns[:3])}")
+						st.write(f"컬럼명: {list(df_stock.columns)}")
 				else:
 					df_stock = df_stock_raw
 			except Exception as e:
