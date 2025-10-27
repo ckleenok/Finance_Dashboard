@@ -37,13 +37,14 @@ def _to_csv_export_url(google_sheets_url: str, gid: Optional[str] = None) -> str
 
 
 @st.cache_data(show_spinner=False)
-def load_sheet(google_sheets_url: str, timeout_seconds: int = 20, gid: Optional[str] = None) -> pd.DataFrame:
+def load_sheet(google_sheets_url: str, timeout_seconds: int = 20, gid: Optional[str] = None, skiprows: Optional[int] = None) -> pd.DataFrame:
 	"""Load a Google Sheet as a DataFrame via CSV export with friendly errors.
 	
 	Args:
 		google_sheets_url: The Google Sheets URL
 		timeout_seconds: Request timeout in seconds
 		gid: Optional gid to target a specific sheet. Defaults to the gid in the URL or 0.
+		skiprows: Optional number of rows to skip at the start. Useful for headers.
 	"""
 	csv_url = _to_csv_export_url(google_sheets_url, gid=gid)
 	try:
@@ -64,7 +65,10 @@ def load_sheet(google_sheets_url: str, timeout_seconds: int = 20, gid: Optional[
 		return pd.DataFrame()
 
 	# Parse CSV text safely
-	df = pd.read_csv(io.StringIO(response.text))
+	if skiprows is not None:
+		df = pd.read_csv(io.StringIO(response.text), skiprows=skiprows)
+	else:
+		df = pd.read_csv(io.StringIO(response.text))
 	return df
 
 

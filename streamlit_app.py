@@ -151,8 +151,12 @@ def main():
 		df_stock = pd.DataFrame()
 		if STOCK_SHEET_GID != "0":
 			try:
-				df_stock = load_sheet(GOOGLE_SHEET_URL_DEFAULT, gid=STOCK_SHEET_GID)
+				df_stock = load_sheet(GOOGLE_SHEET_URL_DEFAULT, gid=STOCK_SHEET_GID, skiprows=2)
 				df_stock = _prepare(df_stock)
+				# Debug: show stock sheet info
+				if not df_stock.empty:
+					st.write(f"주식현황 시트 로드됨: {len(df_stock)}행, {len(df_stock.columns)}열")
+					st.write(f"컬럼명: {list(df_stock.columns)}")
 			except Exception as e:
 				st.warning(f"주식현황 시트를 불러오지 못했습니다: {e}")
 
@@ -369,29 +373,32 @@ def main():
 			st.divider()
 			st.markdown("### 📈 주식현황")
 			try:
-				# Get date column (Q) and value columns (W, X, Y, Z, AA) from stock sheet
-				stock_date_series = get_series_by_letter(df_stock, "Q")
-				stock_date_col = stock_date_series.name if hasattr(stock_date_series, 'name') else df_stock.columns[16]
-				
-				# Get stock series from columns W, X, Y, Z, AA
-				stock_series_w = safe_number(get_series_by_letter(df_stock, "W"))
-				stock_series_x = safe_number(get_series_by_letter(df_stock, "X"))
-				stock_series_y = safe_number(get_series_by_letter(df_stock, "Y"))
-				stock_series_z = safe_number(get_series_by_letter(df_stock, "Z"))
-				stock_series_aa = safe_number(get_series_by_letter(df_stock, "AA"))
-				
-				# Create DataFrame for stock chart
-				df_stock_chart = pd.DataFrame({
-					"Date": stock_date_series,
-					"Column W": stock_series_w,
-					"Column X": stock_series_x,
-					"Column Y": stock_series_y,
-					"Column Z": stock_series_z,
-					"Column AA": stock_series_aa
-				})
-				
-				# Display the chart
-				st.plotly_chart(line_chart(df_stock_chart, "Date", ["Column W", "Column X", "Column Y", "Column Z", "Column AA"], "", height=300), use_container_width=True)
+				# Check if we have enough columns (at least 27 columns for AA)
+				if df_stock.shape[1] < 27:
+					st.caption(f"주식현황 시트에 충분한 컬럼이 없습니다 (현재: {df_stock.shape[1]}). 컬럼 27개 이상이 필요합니다.")
+				else:
+					# Get date column (Q) and value columns (W, X, Y, Z, AA) from stock sheet
+					stock_date_series = get_series_by_letter(df_stock, "Q")
+					
+					# Get stock series from columns W, X, Y, Z, AA
+					stock_series_w = safe_number(get_series_by_letter(df_stock, "W"))
+					stock_series_x = safe_number(get_series_by_letter(df_stock, "X"))
+					stock_series_y = safe_number(get_series_by_letter(df_stock, "Y"))
+					stock_series_z = safe_number(get_series_by_letter(df_stock, "Z"))
+					stock_series_aa = safe_number(get_series_by_letter(df_stock, "AA"))
+					
+					# Create DataFrame for stock chart
+					df_stock_chart = pd.DataFrame({
+						"Date": stock_date_series,
+						"SPY": stock_series_w,
+						"QQQ": stock_series_x,
+						"SCHD": stock_series_y,
+						"GLD": stock_series_z,
+						"Cash/Bond": stock_series_aa
+					})
+					
+					# Display the chart
+					st.plotly_chart(line_chart(df_stock_chart, "Date", ["SPY", "QQQ", "SCHD", "GLD", "Cash/Bond"], "", height=300), use_container_width=True)
 			except Exception as e:
 				st.caption(f"주식현황 그래프를 불러올 수 없습니다: {e}")
 
