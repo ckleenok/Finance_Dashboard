@@ -19,19 +19,24 @@ STOCK_SHEET_GID = "172728277"
 def _prepare(df: pd.DataFrame) -> pd.DataFrame:
 	# Attempt common column conversions
 	for col in df.columns:
-		if "date" in col.lower() or col.endswith(("월", "날짜", "일", "시간")):
+		col_str = str(col)  # Convert column name to string
+		if col_str.lower().find("date") >= 0 or col_str.endswith(("월", "날짜", "일", "시간")):
 			df = coerce_date_column(df, col)
-		elif df[col].dtype == object:
-			# Best-effort numeric conversion for money-like fields
-			maybe_numeric = safe_number(df[col])
-			# Only replace if we actually got numbers in many rows
-			if pd.notna(maybe_numeric).sum() >= max(3, int(0.5 * len(maybe_numeric))):
-				df[col] = maybe_numeric
+		else:
+			try:
+				if df[col].dtype == object:
+					# Best-effort numeric conversion for money-like fields
+					maybe_numeric = safe_number(df[col])
+					# Only replace if we actually got numbers in many rows
+					if pd.notna(maybe_numeric).sum() >= max(3, int(0.5 * len(maybe_numeric))):
+						df[col] = maybe_numeric
+			except Exception:
+				continue
 	
 	# Additional date detection for columns that might contain dates
 	for col in df.columns:
-		if df[col].dtype == object and col not in [c for c in df.columns if str(df[c].dtype).startswith("datetime")]:
-			try:
+		try:
+			if df[col].dtype == object and col not in [c for c in df.columns if str(df[c].dtype).startswith("datetime")]:
 				# Try to detect if this column contains dates
 				sample_values = df[col].dropna().head(20)
 				if len(sample_values) > 0:
@@ -53,8 +58,8 @@ def _prepare(df: pd.DataFrame) -> pd.DataFrame:
 					# If more than 70% look like dates, convert the column
 					if date_like_count >= len(sample_values) * 0.7:
 						df[col] = pd.to_datetime(df[col], errors="coerce")
-			except:
-				continue
+		except Exception:
+			continue
 	
 	return df
 
