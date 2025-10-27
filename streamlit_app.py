@@ -1,9 +1,9 @@
-import streamlit as st
+	import streamlit as st
 import pandas as pd
 
 from app.data import load_sheet, coerce_date_column, safe_number, get_series_by_letter
 from app.charts import line_chart, area_chart
-from app.layout import make_sidebar
+from app.layout import make_filter_section
 
 
 st.set_page_config(page_title="Financial Dashboard", layout="wide")
@@ -11,6 +11,9 @@ st.set_page_config(page_title="Financial Dashboard", layout="wide")
 GOOGLE_SHEET_URL_DEFAULT = (
 	"https://docs.google.com/spreadsheets/d/1HM_Jxv6zQzr-O5Spt06uq2HTyX1yFTVju2jzVjneL5M/edit?gid=462380555"
 )
+
+# GID for the "주식현황" (Stock Status) sheet
+STOCK_SHEET_GID = "172728277"
 
 
 def _prepare(df: pd.DataFrame) -> pd.DataFrame:
@@ -127,8 +130,6 @@ def _apply_time_filter(df: pd.DataFrame, time_filter: str) -> pd.DataFrame:
 
 
 def main():
-	time_filter = make_sidebar()
-	
 	# Header with title and refresh button in right top
 	col_title, col_refresh = st.columns([3, 1])
 	with col_title:
@@ -139,9 +140,21 @@ def main():
 			st.cache_data.clear()
 			st.rerun()
 
+	# Filter section in main content area
+	time_filter = make_filter_section()
+
 	with st.spinner("데이터 불러오는 중..."):
 		df = load_sheet(GOOGLE_SHEET_URL_DEFAULT)
 		df = _prepare(df)
+		
+		# Load the second sheet "주식현황" if GID is provided
+		df_stock = pd.DataFrame()
+		if STOCK_SHEET_GID != "0":
+			try:
+				df_stock = load_sheet(GOOGLE_SHEET_URL_DEFAULT, gid=STOCK_SHEET_GID)
+				df_stock = _prepare(df_stock)
+			except Exception as e:
+				st.warning(f"주식현황 시트를 불러오지 못했습니다: {e}")
 
 	if df.empty:
 		st.warning("데이터가 비어 있습니다. 공유 설정 또는 URL을 확인하세요.")
@@ -350,6 +363,37 @@ def main():
 				st.plotly_chart(line_chart(df_debt, date_col, ["부채합계"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("부채합계 데이터를 불러올 수 없습니다.")
+		
+		# Stock Status chart from second sheet
+		if not df_stock.empty:
+			st.divider()
+			st.markdown("### 📈 주식현황")
+			try:
+				# Get date column (Q) and value columns (W, X, Y, Z, AA) from stock sheet
+				stock_date_series = get_series_by_letter(df_stock, "Q")
+				stock_date_col = stock_date_series.name if hasattr(stock_date_series, 'name') else df_stock.columns[16]
+				
+				# Get stock series from columns W, X, Y, Z, AA
+				stock_series_w = safe_number(get_series_by_letter(df_stock, "W"))
+				stock_series_x = safe_number(get_series_by_letter(df_stock, "X"))
+				stock_series_y = safe_number(get_series_by_letter(df_stock, "Y"))
+				stock_series_z = safe_number(get_series_by_letter(df_stock, "Z"))
+				stock_series_aa = safe_number(get_series_by_letter(df_stock, "AA"))
+				
+				# Create DataFrame for stock chart
+				df_stock_chart = pd.DataFrame({
+					"Date": stock_date_series,
+					"Column W": stock_series_w,
+					"Column X": stock_series_x,
+					"Column Y": stock_series_y,
+					"Column Z": stock_series_z,
+					"Column AA": stock_series_aa
+				})
+				
+				# Display the chart
+				st.plotly_chart(line_chart(df_stock_chart, "Date", ["Column W", "Column X", "Column Y", "Column Z", "Column AA"], "", height=300), use_container_width=True)
+			except Exception as e:
+				st.caption(f"주식현황 그래프를 불러올 수 없습니다: {e}")
 
 	# Google Sheets URL input at the bottom
 	st.divider()

@@ -1,10 +1,11 @@
 import streamlit as st
 
 
-def make_sidebar() -> str:
-	st.sidebar.header("필터")
+def make_filter_section() -> str:
+	"""메인 컨텐츠 영역에 필터 섹션을 생성합니다."""
+	st.markdown("### 📊 데이터 필터")
 	# Time period filter with proper functionality
-	time_filter = st.sidebar.selectbox(
+	time_filter = st.selectbox(
 		"발췌 연도, 월", 
 		options=[
 			"최근 3개월",
