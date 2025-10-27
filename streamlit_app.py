@@ -151,12 +151,18 @@ def main():
 		df_stock = pd.DataFrame()
 		if STOCK_SHEET_GID != "0":
 			try:
-				df_stock = load_sheet(GOOGLE_SHEET_URL_DEFAULT, gid=STOCK_SHEET_GID, skiprows=2)
-				df_stock = _prepare(df_stock)
-				# Debug: show stock sheet info
-				if not df_stock.empty:
-					st.write(f"주식현황 시트 로드됨: {len(df_stock)}행, {len(df_stock.columns)}열")
-					st.write(f"컬럼명: {list(df_stock.columns)}")
+				df_stock_raw = load_sheet(GOOGLE_SHEET_URL_DEFAULT, gid=STOCK_SHEET_GID, skiprows=2)
+				# Get the columns starting from Q (index 16) to AA (index 26)
+				if not df_stock_raw.empty and df_stock_raw.shape[1] > 26:
+					df_stock = df_stock_raw.iloc[:, 16:27].copy()
+					df_stock.columns = [f'Col_{i}' for i in range(df_stock.shape[1])]
+					df_stock = _prepare(df_stock)
+					# Debug: show stock sheet info
+					if not df_stock.empty:
+						st.write(f"주식현황 시트 로드됨: {len(df_stock)}행, {len(df_stock.columns)}열")
+						st.write(f"첫 3개 컬럼 샘플: {list(df_stock.columns[:3])}")
+				else:
+					df_stock = df_stock_raw
 			except Exception as e:
 				st.warning(f"주식현황 시트를 불러오지 못했습니다: {e}")
 
@@ -373,19 +379,19 @@ def main():
 			st.divider()
 			st.markdown("### 📈 주식현황")
 			try:
-				# Check if we have enough columns (at least 27 columns for AA)
-				if df_stock.shape[1] < 27:
-					st.caption(f"주식현황 시트에 충분한 컬럼이 없습니다 (현재: {df_stock.shape[1]}). 컬럼 27개 이상이 필요합니다.")
+				# Check if we have enough columns (now we have Q-AA which is 11 columns)
+				if df_stock.shape[1] < 11:
+					st.caption(f"주식현황 시트에 충분한 컬럼이 없습니다 (현재: {df_stock.shape[1]}). 컬럼 11개 이상이 필요합니다.")
 				else:
-					# Get date column (Q) and value columns (W, X, Y, Z, AA) from stock sheet
-					stock_date_series = get_series_by_letter(df_stock, "Q")
+					# Get columns: Col_0=Q (Date), Col_6=W, Col_7=X, Col_8=Y, Col_9=Z, Col_10=AA
+					stock_date_series = df_stock.iloc[:, 0]  # Q column (Date)
 					
 					# Get stock series from columns W, X, Y, Z, AA
-					stock_series_w = safe_number(get_series_by_letter(df_stock, "W"))
-					stock_series_x = safe_number(get_series_by_letter(df_stock, "X"))
-					stock_series_y = safe_number(get_series_by_letter(df_stock, "Y"))
-					stock_series_z = safe_number(get_series_by_letter(df_stock, "Z"))
-					stock_series_aa = safe_number(get_series_by_letter(df_stock, "AA"))
+					stock_series_w = safe_number(df_stock.iloc[:, 6])  # W column (SPY %)
+					stock_series_x = safe_number(df_stock.iloc[:, 7])  # X column (QQQ %)
+					stock_series_y = safe_number(df_stock.iloc[:, 8])  # Y column (SCHD %)
+					stock_series_z = safe_number(df_stock.iloc[:, 9])  # Z column (GLD %)
+					stock_series_aa = safe_number(df_stock.iloc[:, 10])  # AA column (Cash/Bond %)
 					
 					# Create DataFrame for stock chart
 					df_stock_chart = pd.DataFrame({

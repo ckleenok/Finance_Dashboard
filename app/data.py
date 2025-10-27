@@ -66,7 +66,7 @@ def load_sheet(google_sheets_url: str, timeout_seconds: int = 20, gid: Optional[
 
 	# Parse CSV text safely
 	if skiprows is not None:
-		df = pd.read_csv(io.StringIO(response.text), skiprows=skiprows)
+		df = pd.read_csv(io.StringIO(response.text), skiprows=skiprows, header=None)
 	else:
 		df = pd.read_csv(io.StringIO(response.text))
 	return df
