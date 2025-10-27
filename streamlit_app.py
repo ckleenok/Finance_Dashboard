@@ -157,7 +157,10 @@ def main():
 		if STOCK_SHEET_GID != "0":
 			try:
 				df_stock_raw = load_sheet(GOOGLE_SHEET_URL_DEFAULT, gid=STOCK_SHEET_GID, skiprows=0)
-				# Get the columns starting from Q (index 16) to AA (index 26 managing
+				st.write(f"df_stock_raw 로드됨: {len(df_stock_raw)}행, {df_stock_raw.shape[1]}열")
+				st.write(f"df_stock_raw 컬럼명: {list(df_stock_raw.columns)}")
+				
+				# Get the columns starting from Q (index 16) to AA (index 26)
 				if not df_stock_raw.empty and df_stock_raw.shape[1] > 26:
 					# Extract Q-AA columns (indices 16-26) and keep them separate
 					# First letter=0 (Q), then W=6, X=7, Y=8, Z=9, AA=10 in the extracted range
@@ -173,6 +176,7 @@ def main():
 					# Debug: show before processing
 					st.write(f"_prepare 전: {len(df_stock)}행, {len(df_stock.columns)}열")
 				else:
+					st.write(f"컬럼이 부족하여 df_stock_raw 전체 사용: {df_stock_raw.shape[1]}열")
 					df_stock = df_stock_raw
 			except Exception as e:
 				st.warning(f"주식현황 시트를 불러오지 못했습니다: {e}")
