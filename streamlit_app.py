@@ -1,4 +1,4 @@
-	import streamlit as st
+import streamlit as st
 import pandas as pd
 
 from app.data import load_sheet, coerce_date_column, safe_number, get_series_by_letter
