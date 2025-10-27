@@ -167,10 +167,15 @@ def main():
 					df_stock.columns = [str(col) for col in col_names]
 					# Skip the first row which contains headers
 					df_stock = df_stock.iloc[1:].reset_index(drop=True)
+					
+					# Debug: show before _prepare
+					st.write(f"_prepare 전: {len(df_stock)}행, {len(df_stock.columns)}열")
+					
 					df_stock = _prepare(df_stock)
-					# Debug: show stock sheet info
+					
+					# Debug: show after _prepare
+					st.write(f"_prepare 후: {len(df_stock)}행, {len(df_stock.columns)}열")
 					if not df_stock.empty:
-						st.write(f"주식현황 시트 로드됨: {len(df_stock)}행, {len(df_stock.columns)}열")
 						st.write(f"컬럼명: {list(df_stock.columns)}")
 				else:
 					df_stock = df_stock_raw
