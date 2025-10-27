@@ -220,3 +220,46 @@ def area_chart(df: pd.DataFrame, x_col: str, y_col: str, title: str) -> go.Figur
 	return fig
 
 
+def stacked_bar_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str = "", height: int = 250) -> go.Figure:
+	"""Create a horizontal stacked bar chart from a DataFrame."""
+	fig = go.Figure()
+	
+	# Add traces for each column
+	for col in y_cols:
+		if col not in df.columns:
+			continue
+		fig.add_trace(
+			go.Bar(
+				name=col,
+				orientation='h',
+				y=df[x_col].astype(str),
+				x=df[col],
+				hovertemplate=f"<b>%{{y}}</b><br><b>{col}:</b> %{{x:.2f}}%<extra></extra>",
+				text=df[col].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else ""),
+				textposition='inside'
+			)
+		)
+	
+	# Update layout
+	fig.update_layout(
+		barmode='stack',
+		margin=dict(l=100, r=20, t=40, b=30),
+		title=title,
+		height=height,
+		xaxis=dict(
+			title="Percentage (%)",
+			range=[0, 100],
+			ticksuffix="%"
+		),
+		yaxis=dict(title=""),
+		legend=dict(
+			orientation="h",
+			yanchor="bottom",
+			y=1.02,
+			xanchor="center",
+			x=0.5
+		)
+	)
+	
+	return fig
+

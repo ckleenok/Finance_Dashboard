@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from app.data import load_sheet, coerce_date_column, safe_number, get_series_by_letter
-from app.charts import line_chart, area_chart
+from app.charts import line_chart, area_chart, stacked_bar_chart
 from app.layout import make_sidebar
 
 
@@ -420,7 +420,7 @@ def main():
 			
 			with col2:
 				st.markdown("#### 2. 비율 (%)")
-				st.plotly_chart(line_chart(df_pct, "Date", ["SPY", "QQQ", "SCHD", "GLD", "Cash/Bond"], "", height=300), use_container_width=True)
+				st.plotly_chart(stacked_bar_chart(df_pct, "Date", ["SPY", "QQQ", "SCHD", "GLD", "Cash/Bond"], "", height=300), use_container_width=True)
 		except Exception as e:
 			st.error(f"주식현황 그래프를 불러올 수 없습니다: {e}")
 			import traceback
