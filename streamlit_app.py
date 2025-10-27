@@ -389,10 +389,13 @@ def main():
 			st.markdown("### 📈 주식현황")
 			
 			try:
+				# Convert date column to datetime
+				date_series = pd.to_datetime(df_stock[0], errors='coerce')
+				
 				# First graph: Date & R, S, T, U, V (actual amounts)
 				st.markdown("#### 1. 실제 금액")
 				df_amount = pd.DataFrame({
-					"Date": df_stock[0],  # Column Q
+					"Date": date_series,  # Column Q (converted to datetime)
 					"SPY": safe_number(df_stock[1]),  # Column R
 					"QQQ": safe_number(df_stock[2]),  # Column S
 					"SCHD": safe_number(df_stock[3]),  # Column T
@@ -404,7 +407,7 @@ def main():
 				# Second graph: Date & W, X, Y, Z, AA (percentages)
 				st.markdown("#### 2. 비율 (%)")
 				df_pct = pd.DataFrame({
-					"Date": df_stock[0],  # Column Q
+					"Date": date_series,  # Column Q (converted to datetime)
 					"SPY": safe_number(df_stock[6]),  # Column W
 					"QQQ": safe_number(df_stock[7]),  # Column X
 					"SCHD": safe_number(df_stock[8]),  # Column Y
