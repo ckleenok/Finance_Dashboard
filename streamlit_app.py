@@ -394,6 +394,10 @@ def main():
 		if not df_stock.empty:
 			st.divider()
 			st.markdown("### 📈 주식현황")
+			
+			# Debug: check df_stock at this point
+			st.write(f"그래프 생성 시 df_stock: {len(df_stock)}행, {df_stock.shape[1]}열")
+			
 			try:
 				# Check if we have enough columns (now we have Q-AA which is 11 columns)
 				if df_stock.shape[1] < 11:
