@@ -390,7 +390,10 @@ def main():
 			
 		try:
 			# Convert date column to datetime
+			# First check what's in the date column
+			st.write(f"Date column sample: {df_stock[0].head()}")
 			date_series = pd.to_datetime(df_stock[0], errors='coerce')
+			st.write(f"After conversion: {date_series.head()}")
 			
 			# First graph: Date & R, S, T, U, V (actual amounts)
 			st.markdown("#### 1. 실제 금액")
