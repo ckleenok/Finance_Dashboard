@@ -3,7 +3,7 @@ import pandas as pd
 
 from app.data import load_sheet, coerce_date_column, safe_number, get_series_by_letter
 from app.charts import line_chart, area_chart
-from app.layout import make_filter_section
+from app.layout import make_sidebar
 
 
 st.set_page_config(page_title="Financial Dashboard", layout="wide")
@@ -145,8 +145,7 @@ def main():
 			st.cache_data.clear()
 			st.rerun()
 
-	# Filter section in main content area
-	time_filter = make_filter_section()
+	time_filter = make_sidebar()
 
 	with st.spinner("데이터 불러오는 중..."):
 		df = load_sheet(GOOGLE_SHEET_URL_DEFAULT)
