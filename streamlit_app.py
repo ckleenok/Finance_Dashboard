@@ -388,8 +388,14 @@ def main():
 			st.markdown("### 📈 주식현황")
 			
 		try:
+			# Debug: Show what's in the date column
+			st.write("Debug - df_stock shape:", df_stock.shape)
+			st.write("Debug - df_stock columns:", df_stock.columns.tolist())
+			st.write("Debug - First few rows of column 0:", df_stock[0].head().tolist())
+			
 			# Convert date column to datetime
 			date_series = pd.to_datetime(df_stock[0], format='%m/%d', errors='coerce')
+			st.write("Debug - Parsed dates:", date_series.head().tolist())
 			
 			# First graph: Date & R, S, T, U, V (actual amounts)
 			df_amount = pd.DataFrame({
@@ -400,6 +406,10 @@ def main():
 				"GLD": safe_number(df_stock[4]),  # Column U
 				"Cash/Bond": safe_number(df_stock[5])  # Column V
 			})
+			
+			# Debug: Show the amount data
+			st.write("Debug - df_amount shape:", df_amount.shape)
+			st.write("Debug - df_amount head:", df_amount.head())
 			
 			# Create two columns for side-by-side graphs
 			col1, col2 = st.columns(2)
@@ -417,6 +427,10 @@ def main():
 				"GLD": safe_number(df_stock[9]),  # Column Z
 				"Cash/Bond": safe_number(df_stock[10])  # Column AA
 			})
+			
+			# Debug: Show the percentage data
+			st.write("Debug - df_pct shape:", df_pct.shape)
+			st.write("Debug - df_pct head:", df_pct.head())
 			
 			with col2:
 				st.markdown("#### 2. 비율 (%)")
