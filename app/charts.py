@@ -246,8 +246,8 @@ def stacked_bar_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: st
 		# Normalize to percentage of total
 		df_normalized[col] = (df_normalized[col] / df_normalized['_total']) * 100
 	
-	# Add traces for each column
-	for col in y_cols:
+	# Add traces for each column in reverse order to match legend
+	for col in reversed(y_cols):
 		if col not in df_normalized.columns:
 			continue
 		fig.add_trace(
