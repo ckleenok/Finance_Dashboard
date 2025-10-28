@@ -388,50 +388,78 @@ def main():
 			st.markdown("### 📈 주식현황")
 			
 		try:
-			# Debug: Show what's in the date column
-			st.write("Debug - df_stock shape:", df_stock.shape)
-			st.write("Debug - df_stock columns:", df_stock.columns.tolist())
-			st.write("Debug - First few rows of column 0:", df_stock[0].head().tolist())
+			# Build a robust date parser for stock sheet (handles "YY. M. D." and "MM/DD")
+			# Infer year from main sheet if available
+			main_year = None
+			date_candidate = next((c for c in df_filtered.columns if str(df_filtered[c].dtype).startswith("datetime")), None)
+			if date_candidate is not None and not df_filtered[date_candidate].dropna().empty:
+				try:
+					main_year = int(df_filtered[date_candidate].dropna().iloc[-1].year)
+				except Exception:
+					main_year = None
+			if main_year is None:
+				main_year = pd.Timestamp.today().year
 			
-			# Convert date column to datetime
-			date_series = pd.to_datetime(df_stock[0], format='%m/%d', errors='coerce')
-			st.write("Debug - Parsed dates:", date_series.head().tolist())
-			
-			# First graph: Date & R, S, T, U, V (actual amounts)
+			def _parse_stock_date(value):
+				if pd.isna(value):
+					return None
+				text = str(value).strip()
+				# Case 1: "25. 9. 9." -> YY. M. D.
+				if "." in text:
+					# remove dots and split on whitespace
+					parts = [p for p in text.replace(".", " ").split() if p]
+					if len(parts) >= 3:
+						try:
+							year = 2000 + int(parts[0])
+							month = int(parts[1])
+							day = int(parts[2])
+							return f"{year:04d}/{month:01d}/{day:01d}"
+						except Exception:
+							return None
+					elif len(parts) == 2:
+						# YY M -> assume day 1
+						try:
+							year = 2000 + int(parts[0])
+							month = int(parts[1])
+							return f"{year:04d}/{month:01d}/1"
+						except Exception:
+							return None
+					return None
+				# Case 2: "M/D" or "MM/DD" -> use main_year
+				if "/" in text:
+					return f"{main_year}/{text}"
+				return None
+
+			date_with_year = df_stock[0].apply(_parse_stock_date)
+			date_series = pd.to_datetime(date_with_year, format='%Y/%m/%d', errors='coerce')
+
+			# Build dataframes and drop rows with NaT dates
+			mask_valid = date_series.notna()
 			df_amount = pd.DataFrame({
-				"Date": date_series,  # Column Q (converted to datetime)
-				"SPY": safe_number(df_stock[1]),  # Column R
-				"QQQ": safe_number(df_stock[2]),  # Column S
-				"SCHD": safe_number(df_stock[3]),  # Column T
-				"GLD": safe_number(df_stock[4]),  # Column U
-				"Cash/Bond": safe_number(df_stock[5])  # Column V
-			})
-			
-			# Debug: Show the amount data
-			st.write("Debug - df_amount shape:", df_amount.shape)
-			st.write("Debug - df_amount head:", df_amount.head())
-			
+				"Date": date_series,
+				"SPY": safe_number(df_stock[1]),
+				"QQQ": safe_number(df_stock[2]),
+				"SCHD": safe_number(df_stock[3]),
+				"GLD": safe_number(df_stock[4]),
+				"Cash/Bond": safe_number(df_stock[5])
+			})[mask_valid]
+
 			# Create two columns for side-by-side graphs
 			col1, col2 = st.columns(2)
-			
+
 			with col1:
 				st.markdown("#### 1. 실제 금액")
 				st.plotly_chart(line_chart(df_amount, "Date", ["SPY", "QQQ", "SCHD", "GLD", "Cash/Bond"], "", height=300), use_container_width=True)
-			
-			# Second graph: Date & W, X, Y, Z, AA (percentages)
+
 			df_pct = pd.DataFrame({
-				"Date": date_series,  # Column Q (converted to datetime)
-				"SPY": safe_number(df_stock[6]),  # Column W
-				"QQQ": safe_number(df_stock[7]),  # Column X
-				"SCHD": safe_number(df_stock[8]),  # Column Y
-				"GLD": safe_number(df_stock[9]),  # Column Z
-				"Cash/Bond": safe_number(df_stock[10])  # Column AA
-			})
-			
-			# Debug: Show the percentage data
-			st.write("Debug - df_pct shape:", df_pct.shape)
-			st.write("Debug - df_pct head:", df_pct.head())
-			
+				"Date": date_series,
+				"SPY": safe_number(df_stock[6]),
+				"QQQ": safe_number(df_stock[7]),
+				"SCHD": safe_number(df_stock[8]),
+				"GLD": safe_number(df_stock[9]),
+				"Cash/Bond": safe_number(df_stock[10])
+			})[mask_valid]
+
 			with col2:
 				st.markdown("#### 2. 비율 (%)")
 				st.plotly_chart(stacked_bar_chart(df_pct, "Date", ["SPY", "QQQ", "SCHD", "GLD", "Cash/Bond"], "", height=300), use_container_width=True)
