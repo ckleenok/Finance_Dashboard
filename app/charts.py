@@ -279,7 +279,8 @@ def stacked_bar_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: st
 			yanchor="bottom",
 			y=1.02,
 			xanchor="center",
-			x=0.5
+			x=0.5,
+			traceorder="reversed"
 		)
 	)
 	
