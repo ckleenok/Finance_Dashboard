@@ -227,7 +227,19 @@ def stacked_bar_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: st
 	# Normalize each row to 100%
 	df_normalized = df.copy()
 	df_normalized['_total'] = df_normalized[y_cols].sum(axis=1)
-	
+	# Avoid division by zero
+	df_normalized['_total'] = df_normalized['_total'].replace(0, 1)
+
+	# Build one-line date strings and lock category order
+	if pd.api.types.is_datetime64_any_dtype(df_normalized[x_col]):
+		date_str = df_normalized[x_col].dt.strftime('%b %d')
+		# If year changes within data, append year where it changes
+		years = df_normalized[x_col].dt.year.fillna(method='ffill')
+		if years.nunique() > 1:
+			date_str = df_normalized[x_col].dt.strftime('%b %d %Y')
+	else:
+		date_str = df_normalized[x_col].astype(str)
+
 	for col in y_cols:
 		if col not in df_normalized.columns:
 			continue
@@ -242,7 +254,7 @@ def stacked_bar_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: st
 			go.Bar(
 				name=col,
 				orientation='h',
-				y=df_normalized[x_col].astype(str),
+				y=date_str,
 				x=df_normalized[col],
 				hovertemplate=f"<b>%{{y}}</b><br><b>{col}:</b> %{{x:.2f}}%<extra></extra>",
 				text=df_normalized[col].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else ""),
@@ -261,7 +273,7 @@ def stacked_bar_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: st
 			range=[0, 100],
 			ticksuffix="%"
 		),
-		yaxis=dict(title=""),
+		yaxis=dict(title="", type='category', categoryorder='array', categoryarray=date_str.tolist()),
 		legend=dict(
 			orientation="h",
 			yanchor="bottom",
