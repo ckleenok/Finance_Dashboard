@@ -247,6 +247,7 @@ def stacked_bar_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: st
 		df_normalized[col] = (df_normalized[col] / df_normalized['_total']) * 100
 	
 	# Add traces for each column in the order specified
+	# 전달된 columns 순서대로 추가 (이 순서가 쌓이는 왼쪽 → 오른쪽 순서가 됨)
 	for col in y_cols:
 		if col not in df_normalized.columns:
 			continue
@@ -274,14 +275,14 @@ def stacked_bar_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: st
 			ticksuffix="%"
 		),
 		yaxis=dict(title="", type='category', categoryorder='array', categoryarray=date_str.tolist()),
-	legend=dict(
-		orientation="h",
-		yanchor="bottom",
-		y=1.02,
-		xanchor="center",
-		x=0.5,
-		traceorder="reversed",  # show legend in reverse trace order
-	)
+		legend=dict(
+			orientation="h",
+			yanchor="bottom",
+			y=1.02,
+			xanchor="center",
+			x=0.5,
+			traceorder='normal'  # 중요: legend 순서를 trace 추가 순서대로
+		)
 	)
 	
 	return fig
