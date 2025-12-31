@@ -217,6 +217,42 @@ def main():
 			color = "gray"
 		
 		return f"[{change_str} {pct_str}]", color
+	
+	# Helper function to calculate period change (first to last value in filtered period)
+	def get_period_change(series):
+		"""Calculate change from first to last value in the filtered period"""
+		series_clean = series.dropna()
+		if len(series_clean) < 2:
+			return None, None, "gray"
+		
+		first_value = series_clean.iloc[0]
+		last_value = series_clean.iloc[-1]
+		
+		change = last_value - first_value
+		change_pct = (change / first_value * 100) if first_value != 0 else 0
+		
+		# Format change amount
+		if abs(change) >= 1_000_000_000:  # 1B+
+			change_str = f"{change/1_000_000_000:+.1f}B"
+		elif abs(change) >= 1_000_000:  # 1M+
+			change_str = f"{change/1_000_000:+.1f}M"
+		elif abs(change) >= 1_000:  # 1K+
+			change_str = f"{change/1_000:+.1f}K"
+		else:
+			change_str = f"{change:+.0f}"
+		
+		# Format percentage
+		pct_str = f"{change_pct:+.1f}%"
+		
+		# Color coding
+		if change > 0:
+			color = "green"
+		elif change < 0:
+			color = "red"
+		else:
+			color = "gray"
+		
+		return f"해당 기간 변동 금액({change_str})[{pct_str}]", color
 
 	# Layout similar to screenshot: 2-column top grid then 3-column sections
 	row1_col1 = st.container()
@@ -239,6 +275,9 @@ def main():
 				mom_change, change_color = get_mom_change(assets_series)
 				title_with_value = f"자산합계 ({latest_assets:,.0f}) {mom_change}"
 				st.markdown(f"<h3 style='color: {change_color}; font-size: 1.4rem; margin-bottom: 0.5rem;'>{title_with_value}</h3>", unsafe_allow_html=True)
+				period_change, period_color = get_period_change(assets_series)
+				if period_change:
+					st.markdown(f"<p style='color: {period_color}; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 0.5rem;'>{period_change}</p>", unsafe_allow_html=True)
 				st.plotly_chart(line_chart(df_assets, date_col, ["자산합계"], ""), use_container_width=True)
 			except Exception:
 				st.caption("자산합계 데이터를 불러올 수 없습니다.")
@@ -252,6 +291,9 @@ def main():
 				mom_change, change_color = get_mom_change(networth_series)
 				title_with_value = f"순자산합계 ({latest_networth:,.0f}) {mom_change}"
 				st.markdown(f"<h3 style='color: {change_color}; font-size: 1.4rem; margin-bottom: 0.5rem;'>{title_with_value}</h3>", unsafe_allow_html=True)
+				period_change, period_color = get_period_change(networth_series)
+				if period_change:
+					st.markdown(f"<p style='color: {period_color}; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 0.5rem;'>{period_change}</p>", unsafe_allow_html=True)
 				st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], "", show_mom_change=True), use_container_width=True)
 			except Exception:
 				# Fallback: heuristic first numeric column
@@ -270,6 +312,9 @@ def main():
 				mom_change, change_color = get_mom_change(stock_series)
 				title_with_value = f"주식합계 ({latest_stock:,.0f}) {mom_change}"
 				st.markdown(f"<h4 style='color: {change_color}; font-size: 1.2rem; margin-bottom: 0.3rem;'>{title_with_value}</h4>", unsafe_allow_html=True)
+				period_change, period_color = get_period_change(stock_series)
+				if period_change:
+					st.markdown(f"<p style='color: {period_color}; font-size: 0.85rem; margin-top: -0.3rem; margin-bottom: 0.3rem;'>{period_change}</p>", unsafe_allow_html=True)
 				st.plotly_chart(line_chart(df_stock_chart, date_col, ["주식합계"], "", height=200, show_mom_change=True), use_container_width=True)
 			except Exception:
 				st.caption("주식합계 데이터를 불러올 수 없습니다.")
@@ -283,6 +328,9 @@ def main():
 				mom_change, change_color = get_mom_change(pension_series)
 				title_with_value = f"연금자산합계 ({latest_pension:,.0f}) {mom_change}"
 				st.markdown(f"<h4 style='color: {change_color}; font-size: 1.2rem; margin-bottom: 0.3rem;'>{title_with_value}</h4>", unsafe_allow_html=True)
+				period_change, period_color = get_period_change(pension_series)
+				if period_change:
+					st.markdown(f"<p style='color: {period_color}; font-size: 0.85rem; margin-top: -0.3rem; margin-bottom: 0.3rem;'>{period_change}</p>", unsafe_allow_html=True)
 				st.plotly_chart(line_chart(df_pension, date_col, ["연금자산합계"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("연금자산합계 데이터를 불러올 수 없습니다.")
@@ -296,6 +344,9 @@ def main():
 				mom_change, change_color = get_mom_change(realestate_series)
 				title_with_value = f"부동산자산합계 ({latest_realestate:,.0f}) {mom_change}"
 				st.markdown(f"<h4 style='color: {change_color}; font-size: 1.2rem; margin-bottom: 0.3rem;'>{title_with_value}</h4>", unsafe_allow_html=True)
+				period_change, period_color = get_period_change(realestate_series)
+				if period_change:
+					st.markdown(f"<p style='color: {period_color}; font-size: 0.85rem; margin-top: -0.3rem; margin-bottom: 0.3rem;'>{period_change}</p>", unsafe_allow_html=True)
 				st.plotly_chart(line_chart(df_realestate, date_col, ["부동산자산합계"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("부동산자산합계 데이터를 불러올 수 없습니다.")
@@ -332,6 +383,12 @@ def main():
 				with col_s:
 					st.markdown(f"<p style='color: {change_color_s}; font-size: 1.1rem; margin: 0;'>철규: {latest_isa_s:,.0f} {mom_change_s}</p>", unsafe_allow_html=True)
 				
+				# Calculate period change for combined ISA
+				isa_total_series = isa_q_series + isa_s_series
+				period_change, period_color = get_period_change(isa_total_series)
+				if period_change:
+					st.markdown(f"<p style='color: {period_color}; font-size: 0.9rem; margin-top: 0.3rem; margin-bottom: 0.3rem;'>{period_change}</p>", unsafe_allow_html=True)
+				
 				st.plotly_chart(line_chart(df_isa, date_col, ["연희 미래 ISA/연금", "철규 미래 ISA"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("ISA/연금 데이터를 불러올 수 없습니다.")
@@ -365,6 +422,12 @@ def main():
 				with col_t:
 					st.markdown(f"<p style='color: {change_color_t}; font-size: 1.1rem; margin: 0;'>철규: {latest_toss_t:,.0f} {mom_change_t}</p>", unsafe_allow_html=True)
 				
+				# Calculate period change for combined Toss Stocks
+				toss_total_series = toss_p_series + toss_t_series
+				period_change, period_color = get_period_change(toss_total_series)
+				if period_change:
+					st.markdown(f"<p style='color: {period_color}; font-size: 0.9rem; margin-top: 0.3rem; margin-bottom: 0.3rem;'>{period_change}</p>", unsafe_allow_html=True)
+				
 				st.plotly_chart(line_chart(df_toss, date_col, ["연희 토스 주식", "철규 토스 주식"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("토스 주식 데이터를 불러올 수 없습니다.")
@@ -378,6 +441,9 @@ def main():
 				mom_change, change_color = get_mom_change(debt_series)
 				title_with_value = f"부채합계 ({latest_debt:,.0f}) {mom_change}"
 				st.markdown(f"<h3 style='color: {change_color}; font-size: 1.4rem; margin-bottom: 0.5rem;'>{title_with_value}</h3>", unsafe_allow_html=True)
+				period_change, period_color = get_period_change(debt_series)
+				if period_change:
+					st.markdown(f"<p style='color: {period_color}; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 0.5rem;'>{period_change}</p>", unsafe_allow_html=True)
 				st.plotly_chart(line_chart(df_debt, date_col, ["부채합계"], "", height=200), use_container_width=True)
 			except Exception:
 				st.caption("부채합계 데이터를 불러올 수 없습니다.")
