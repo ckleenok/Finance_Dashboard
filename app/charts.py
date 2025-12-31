@@ -27,20 +27,56 @@ def _add_trendline(fig: go.Figure, x, y, name: str = "Trend") -> None:
 	)
 
 
-def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, height: int = 250) -> go.Figure:
+def line_chart(df: pd.DataFrame, x_col: str, y_cols: List[str], title: str, height: int = 250, show_mom_change: bool = False) -> go.Figure:
 	fig = go.Figure()
 	for col in y_cols:
 		if col not in df.columns:
 			continue
+		
+		# Calculate month-over-month change percentage if requested
+		mom_change_pct = None
+		if show_mom_change:
+			# Calculate MoM change for each point
+			mom_change_pct = []
+			for i in range(len(df)):
+				if pd.isna(df[col].iloc[i]):
+					mom_change_pct.append(float('nan'))
+				elif i == 0:
+					mom_change_pct.append(float('nan'))  # No previous value for first point
+				else:
+					current = df[col].iloc[i]
+					previous = df[col].iloc[i-1]
+					if pd.notna(previous) and previous != 0:
+						change_pct = ((current - previous) / previous) * 100
+						mom_change_pct.append(change_pct)
+					else:
+						mom_change_pct.append(float('nan'))
+			
+			# Convert to numpy array for better handling
+			import numpy as np
+			mom_change_pct = np.array(mom_change_pct)
+		
+		# Build hover template
+		if show_mom_change and mom_change_pct is not None:
+			hovertemplate = "<b>%{x}</b><br>" + \
+							f"<b>{col}:</b> %{{y:,.0f}}<br>" + \
+							"<b>전월대비:</b> %{customdata:.2f}%<br>" + \
+							"<extra></extra>"
+			customdata = mom_change_pct
+		else:
+			hovertemplate = "<b>%{x}</b><br>" + \
+							f"<b>{col}:</b> %{{y:,.0f}}<br>" + \
+							"<extra></extra>"
+			customdata = None
+		
 		fig.add_trace(
 			go.Scatter(
 				x=df[x_col],
 				y=df[col],
 				mode="lines+markers",
 				name=col,
-				hovertemplate="<b>%{x}</b><br>" +
-							f"<b>{col}:</b> %{{y:,.0f}}<br>" +
-							"<extra></extra>"
+				hovertemplate=hovertemplate,
+				customdata=customdata
 			)
 		)
 	# Trendline removed - no longer adding trendlines to charts

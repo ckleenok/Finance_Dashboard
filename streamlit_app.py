@@ -252,7 +252,7 @@ def main():
 				mom_change, change_color = get_mom_change(networth_series)
 				title_with_value = f"순자산합계 ({latest_networth:,.0f}) {mom_change}"
 				st.markdown(f"<h3 style='color: {change_color}; font-size: 1.4rem; margin-bottom: 0.5rem;'>{title_with_value}</h3>", unsafe_allow_html=True)
-				st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], ""), use_container_width=True)
+				st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], "", show_mom_change=True), use_container_width=True)
 			except Exception:
 				# Fallback: heuristic first numeric column
 				if len(numeric_cols) >= 1:
