@@ -286,7 +286,12 @@ def main():
 			# Net worth chart (AM column)
 			try:
 				networth_series = safe_number(get_series_by_letter(df_filtered, "AM"))
-				df_networth = pd.DataFrame({date_col: df_filtered[date_col], "순자산합계": networth_series})
+				networth_gap_series = safe_number(get_series_by_letter(df_filtered, "AO"))
+				df_networth = pd.DataFrame({
+					date_col: df_filtered[date_col],
+					"순자산합계": networth_series,
+					"순자산-목표 순자산": networth_gap_series
+				})
 				latest_networth = networth_series.dropna().iloc[-1] if not networth_series.dropna().empty else 0
 				mom_change, change_color = get_mom_change(networth_series)
 				title_with_value = f"순자산합계 ({latest_networth:,.0f}) {mom_change}"
@@ -294,7 +299,10 @@ def main():
 				period_change, period_color = get_period_change(networth_series)
 				if period_change:
 					st.markdown(f"<p style='color: {period_color}; font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 0.5rem;'>{period_change}</p>", unsafe_allow_html=True)
-				st.plotly_chart(line_chart(df_networth, date_col, ["순자산합계"], "", show_mom_change=True), use_container_width=True)
+				st.plotly_chart(
+					line_chart(df_networth, date_col, ["순자산합계", "순자산-목표 순자산"], "", show_mom_change=True),
+					use_container_width=True
+				)
 			except Exception:
 				# Fallback: heuristic first numeric column
 				if len(numeric_cols) >= 1:
